@@ -70,15 +70,7 @@ fun DashboardContent(
                 }
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(
-                        painter = painterResource(id = R.drawable.dashboard_img),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(140.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
                         text = "${overallHealth}%",
                         style = MaterialTheme.typography.displayLarge.copy(
@@ -111,7 +103,7 @@ fun DashboardContent(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, locale = "ar")
 @Composable
 fun DashboardContentPreview() {
     WaterFilterTheme {

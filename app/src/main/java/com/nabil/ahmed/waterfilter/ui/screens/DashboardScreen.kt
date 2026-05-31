@@ -14,18 +14,37 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nabil.ahmed.waterfilter.R
+import com.nabil.ahmed.waterfilter.data.entity.Filter
+import com.nabil.ahmed.waterfilter.data.entity.FilterWithStages
+import com.nabil.ahmed.waterfilter.data.entity.Stage
+import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     viewModel: WaterFilterViewModel,
     onAddFilter: () -> Unit
 ) {
     val filters by viewModel.allFiltersWithStages.collectAsStateWithLifecycle()
+
+    DashboardScreenContent(
+        filters = filters,
+        onAddFilter = onAddFilter,
+        onMarkAsChanged = { viewModel.updateStage(it) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DashboardScreenContent(
+    filters: List<FilterWithStages>,
+    onAddFilter: () -> Unit,
+    onMarkAsChanged: (Stage) -> Unit
+) {
     var selectedFilterIndex by remember { mutableIntStateOf(0) }
 
     val currentFilter = filters.getOrNull(selectedFilterIndex)
@@ -110,10 +129,39 @@ fun DashboardScreen(
                 currentFilter?.let { filter ->
                     DashboardContent(
                         filter = filter,
-                        onMarkAsChanged = { viewModel.updateStage(it) }
+                        onMarkAsChanged = onMarkAsChanged
                     )
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DashboardScreenPreview() {
+    val sampleFilters = listOf(
+        FilterWithStages(
+            filter = Filter(1, "Home Filter", 3),
+            stages = listOf(
+                Stage(1, 1, 1, "PP Filter", 90, System.currentTimeMillis()),
+                Stage(2, 1, 2, "GAC Filter", 180, System.currentTimeMillis()),
+                Stage(3, 1, 3, "CTO Filter", 180, System.currentTimeMillis())
+            )
+        ),
+        FilterWithStages(
+            filter = Filter(2, "Office Filter", 5),
+            stages = listOf(
+                Stage(4, 2, 1, "PP Filter", 90, System.currentTimeMillis()),
+                Stage(5, 2, 2, "GAC Filter", 180, System.currentTimeMillis())
+            )
+        )
+    )
+    WaterFilterTheme {
+        DashboardScreenContent(
+            filters = sampleFilters,
+            onAddFilter = {},
+            onMarkAsChanged = {}
+        )
     }
 }
