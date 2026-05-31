@@ -29,23 +29,20 @@ fun StageConfigurationScreen(
     onBack: () -> Unit
 ) {
     val stages = remember {
-        val list = mutableListOf<StageConfigState>()
-        list.add(StageConfigState(1, R.string.stage_pp, 90))
-        list.add(StageConfigState(2, R.string.stage_gac, 180))
-        list.add(StageConfigState(3, R.string.stage_cto, 180))
-        if (filterType >= 5) {
-            list.add(StageConfigState(4, R.string.stage_ro, 730))
-            list.add(StageConfigState(5, R.string.stage_post_carbon, 365))
+        mutableStateListOf<StageConfigState>().apply {
+            add(StageConfigState(1, R.string.stage_pp, 90))
+            add(StageConfigState(2, R.string.stage_gac, 180))
+            add(StageConfigState(3, R.string.stage_cto, 180))
+            if (filterType >= 5) {
+                add(StageConfigState(4, R.string.stage_ro, 730))
+                add(StageConfigState(5, R.string.stage_post_carbon, 365))
+            }
+            if (filterType >= 7) {
+                add(StageConfigState(6, R.string.stage_mineral, 365))
+                add(StageConfigState(7, R.string.stage_alkaline, 365))
+            }
         }
-        if (filterType >= 7) {
-            list.add(StageConfigState(6, R.string.stage_mineral, 365))
-            list.add(StageConfigState(7, R.string.stage_alkaline, 365))
-        }
-        list
     }
-
-    // This state is just to trigger recomposition when individual stages change
-    var updateTrigger by remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -128,13 +125,17 @@ fun StageConfigurationScreen(
                 contentPadding = PaddingValues(bottom = 100.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(stages) { stage ->
+                items(stages, key = { it.stageNumber }) { stage ->
                     StageConfigItem(
                         stage = stage,
                         onSelectionChanged = { selection, timestamp ->
-                            stage.selection = selection
-                            stage.lastChangedTimestamp = timestamp
-                            updateTrigger++
+                            val index = stages.indexOfFirst { it.stageNumber == stage.stageNumber }
+                            if (index != -1) {
+                                stages[index] = stage.copy(
+                                    selection = selection,
+                                    lastChangedTimestamp = timestamp
+                                )
+                            }
                         }
                     )
                 }

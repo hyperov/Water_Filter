@@ -4,8 +4,8 @@ data class StageConfigState(
     val stageNumber: Int,
     val nameResId: Int,
     val lifespanDays: Int,
-    var lastChangedTimestamp: Long? = null,
-    var selection: SelectionType = SelectionType.DONT_REMEMBER
+    val lastChangedTimestamp: Long? = null,
+    val selection: SelectionType = SelectionType.DONT_REMEMBER
 )
 
 enum class SelectionType {

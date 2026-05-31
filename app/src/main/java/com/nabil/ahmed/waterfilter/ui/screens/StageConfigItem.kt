@@ -142,10 +142,13 @@ fun StageConfigItem(
 @Preview
 @Composable
 fun StageConfigItemPreview() {
+    var stage by remember { mutableStateOf(StageConfigState(1, R.string.stage_pp, 90)) }
     WaterFilterTheme {
         StageConfigItem(
-            stage = StageConfigState(1, R.string.stage_pp, 90),
-            onSelectionChanged = { _, _ -> }
+            stage = stage,
+            onSelectionChanged = { selection, timestamp ->
+                stage = stage.copy(selection = selection, lastChangedTimestamp = timestamp)
+            }
         )
     }
 }
