@@ -13,7 +13,7 @@ fun calculateStageHealth(stage: Stage): HealthInfo {
     
     val now = System.currentTimeMillis()
     val elapsedMillis = now - stage.lastChangedTimestamp
-    val lifespanMillis = TimeUnit.DAYS.toMillis(stage.lifespanDays.toLong())
+    val lifespanMillis = TimeUnit.DAYS.toMillis(stage.lifespanDays.days.toLong())
     
     val remainingMillis = lifespanMillis - elapsedMillis
     val daysRemaining = TimeUnit.MILLISECONDS.toDays(remainingMillis)

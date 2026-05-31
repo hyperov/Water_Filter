@@ -7,6 +7,7 @@ import com.nabil.ahmed.waterfilter.data.entity.Filter
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithStages
 import com.nabil.ahmed.waterfilter.data.entity.MaintenanceLog
 import com.nabil.ahmed.waterfilter.data.entity.Stage
+import com.nabil.ahmed.waterfilter.data.util.FilterType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +26,7 @@ class WaterFilterViewModel @Inject constructor(
     val allMaintenanceLogs: StateFlow<List<MaintenanceLog>> = dao.getAllMaintenanceLogs()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun saveFilter(name: String, type: Int, stages: List<Stage>) {
+    fun saveFilter(name: String, type: FilterType, stages: List<Stage>) {
         viewModelScope.launch {
             val filterId = dao.insertFilter(Filter(name = name, type = type))
             val stagesWithId = stages.map { it.copy(filterId = filterId) }
@@ -40,7 +41,7 @@ class WaterFilterViewModel @Inject constructor(
             
             val log = MaintenanceLog(
                 filterId = stage.filterId,
-                stageNumber = stage.stageNumber,
+                stageNumber = stage.stageNumber.value,
                 stageName = stage.name,
                 changeDateTimestamp = updatedStage.lastChangedTimestamp
             )

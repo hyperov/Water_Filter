@@ -21,6 +21,9 @@ import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.Filter
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithStages
 import com.nabil.ahmed.waterfilter.data.entity.Stage
+import com.nabil.ahmed.waterfilter.data.util.FilterType
+import com.nabil.ahmed.waterfilter.data.util.Lifespan
+import com.nabil.ahmed.waterfilter.data.util.StageNumber
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
 
@@ -142,18 +145,18 @@ fun DashboardScreenContent(
 fun DashboardScreenPreview() {
     val sampleFilters = listOf(
         FilterWithStages(
-            filter = Filter(1, "Home Filter", 3),
+            filter = Filter(1L, "Home Filter", FilterType.STAGES_7),
             stages = listOf(
-                Stage(1, 1, 1, "PP Filter", 90, System.currentTimeMillis()),
-                Stage(2, 1, 2, "GAC Filter", 180, System.currentTimeMillis()),
-                Stage(3, 1, 3, "CTO Filter", 180, System.currentTimeMillis())
+                Stage(1L, 1L, StageNumber.STAGE_1, "PP Filter", Lifespan.MONTHS_3, System.currentTimeMillis()),
+                Stage(2L, 1L, StageNumber.STAGE_2, "GAC Filter", Lifespan.MONTHS_6, System.currentTimeMillis()),
+                Stage(3L, 1L, StageNumber.STAGE_3, "CTO Filter", Lifespan.MONTHS_6, System.currentTimeMillis())
             )
         ),
         FilterWithStages(
-            filter = Filter(2, "Office Filter", 5),
+            filter = Filter(2L, "Office Filter", FilterType.STAGES_5),
             stages = listOf(
-                Stage(4, 2, 1, "PP Filter", 90, System.currentTimeMillis()),
-                Stage(5, 2, 2, "GAC Filter", 180, System.currentTimeMillis())
+                Stage(4L, 2L, StageNumber.STAGE_1, "PP Filter", Lifespan.MONTHS_3, System.currentTimeMillis()),
+                Stage(5L, 2L, StageNumber.STAGE_2, "GAC Filter", Lifespan.MONTHS_6, System.currentTimeMillis())
             )
         )
     )

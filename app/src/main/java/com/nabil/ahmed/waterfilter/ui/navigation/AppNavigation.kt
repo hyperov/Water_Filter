@@ -41,10 +41,10 @@ fun AppNavigation(
                     onSave = { stagesConfig ->
                         val stages = stagesConfig.map { config ->
                             Stage(
-                                filterId = 0, // Will be set in ViewModel
+                                filterId = 0L, // Will be set in ViewModel
                                 stageNumber = config.stageNumber,
                                 name = res.getString(config.nameResId),
-                                lifespanDays = config.lifespanDays,
+                                lifespanDays = config.lifespan,
                                 lastChangedTimestamp = config.lastChangedTimestamp ?: 0L
                             )
                         }

@@ -4,6 +4,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.nabil.ahmed.waterfilter.data.util.Lifespan
+import com.nabil.ahmed.waterfilter.data.util.StageNumber
 
 @Entity(
     tableName = "stages",
@@ -20,8 +22,8 @@ import androidx.room.PrimaryKey
 data class Stage(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val filterId: Long,
-    val stageNumber: Int,
+    val stageNumber: StageNumber,
     val name: String,
-    val lifespanDays: Int,
+    val lifespanDays: Lifespan,
     val lastChangedTimestamp: Long
 )

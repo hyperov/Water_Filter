@@ -19,6 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.Stage
+import com.nabil.ahmed.waterfilter.data.util.Lifespan
+import com.nabil.ahmed.waterfilter.data.util.StageNumber
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 
 @Composable
@@ -56,6 +58,25 @@ fun StageHealthCard(
                             color = if (healthInfo.daysRemaining > 0) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
                             fontWeight = if (healthInfo.daysRemaining <= 0) FontWeight.Bold else FontWeight.Normal
                         )
+                    )
+                    
+                    val description = when (stage.stageNumber) {
+                        StageNumber.STAGE_1 -> stringResource(R.string.stage_pp_desc)
+                        StageNumber.STAGE_2 -> stringResource(R.string.stage_gac_desc)
+                        StageNumber.STAGE_3 -> stringResource(R.string.stage_cto_desc)
+                        StageNumber.STAGE_4 -> stringResource(R.string.stage_ro_desc)
+                        StageNumber.STAGE_5 -> stringResource(R.string.stage_post_carbon_desc)
+                        StageNumber.STAGE_6 -> stringResource(R.string.stage_mineral_desc)
+                        StageNumber.STAGE_7 -> stringResource(R.string.stage_alkaline_desc)
+                    }
+                    
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
                 
@@ -112,11 +133,11 @@ fun StageHealthCardPreview() {
     WaterFilterTheme {
         StageHealthCard(
             stage = Stage(
-                id = 1,
-                filterId = 1,
-                stageNumber = 1,
+                id = 1L,
+                filterId = 1L,
+                stageNumber = StageNumber.STAGE_1,
                 name = "PP Filter",
-                lifespanDays = 90,
+                lifespanDays = Lifespan.MONTHS_3,
                 lastChangedTimestamp = System.currentTimeMillis()
             ),
             onMarkAsChanged = {}

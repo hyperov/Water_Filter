@@ -67,5 +67,12 @@
     <string name="overdue">انتهى موعد التغيير!</string>
     <string name="add_filter">إضافة فلتر</string>
     <string name="ok">موافق</string>
+    <string name="stage_pp_desc">شمعة الشوائب: لإزالة الرمل والصدأ والعوالق.</string>
+    <string name="stage_gac_desc">كربون حبيبي: لإزالة الكلور والطعم والرائحة واللون.</string>
+    <string name="stage_cto_desc">كربون مسمط: لإزالة بقايا الكلور والمواد العضوية.</string>
+    <string name="stage_ro_desc">الممبرين: فصل الأملاح الذائبة والمعادن الثقيلة والبكتيريا.</string>
+    <string name="stage_post_carbon_desc">كربون نهائي: تحسين طعم المياه وإزالة أي روائح.</string>
+    <string name="stage_mineral_desc">المعادن: إضافة الأملاح المعدنية الضرورية للجسم.</string>
+    <string name="stage_alkaline_desc">الألكالين: ضبط درجة القلوية وتحسين جودة المياه.</string>
     <string name="back">رجوع</string>
 </resources>

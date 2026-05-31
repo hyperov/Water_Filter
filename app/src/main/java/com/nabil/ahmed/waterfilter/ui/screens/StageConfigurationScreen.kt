@@ -18,28 +18,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nabil.ahmed.waterfilter.R
+import com.nabil.ahmed.waterfilter.data.util.FilterType
+import com.nabil.ahmed.waterfilter.data.util.Lifespan
+import com.nabil.ahmed.waterfilter.data.util.StageNumber
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StageConfigurationScreen(
     filterName: String,
-    filterType: Int,
+    filterType: FilterType,
     onSave: (List<StageConfigState>) -> Unit,
     onBack: () -> Unit
 ) {
     val stages = remember {
         mutableStateListOf<StageConfigState>().apply {
-            add(StageConfigState(1, R.string.stage_pp, 90))
-            add(StageConfigState(2, R.string.stage_gac, 180))
-            add(StageConfigState(3, R.string.stage_cto, 180))
-            if (filterType >= 5) {
-                add(StageConfigState(4, R.string.stage_ro, 730))
-                add(StageConfigState(5, R.string.stage_post_carbon, 365))
+            add(StageConfigState(StageNumber.STAGE_1, R.string.stage_pp, R.string.stage_pp_desc, Lifespan.MONTHS_3))
+            add(StageConfigState(StageNumber.STAGE_2, R.string.stage_gac, R.string.stage_gac_desc, Lifespan.MONTHS_6))
+            add(StageConfigState(StageNumber.STAGE_3, R.string.stage_cto, R.string.stage_cto_desc, Lifespan.MONTHS_6))
+            if (filterType.stagesCount >= 5) {
+                add(StageConfigState(StageNumber.STAGE_4, R.string.stage_ro, R.string.stage_ro_desc, Lifespan.MONTHS_24))
+                add(StageConfigState(StageNumber.STAGE_5, R.string.stage_post_carbon, R.string.stage_post_carbon_desc, Lifespan.MONTHS_12))
             }
-            if (filterType >= 7) {
-                add(StageConfigState(6, R.string.stage_mineral, 365))
-                add(StageConfigState(7, R.string.stage_alkaline, 365))
+            if (filterType.stagesCount >= 7) {
+                add(StageConfigState(StageNumber.STAGE_6, R.string.stage_mineral, R.string.stage_mineral_desc, Lifespan.MONTHS_12))
+                add(StageConfigState(StageNumber.STAGE_7, R.string.stage_alkaline, R.string.stage_alkaline_desc, Lifespan.MONTHS_12))
             }
         }
     }
@@ -148,6 +151,6 @@ fun StageConfigurationScreen(
 @Composable
 fun StageConfigurationPreview() {
     WaterFilterTheme {
-        StageConfigurationScreen(filterName = "Home", filterType = 7, onSave = {}, onBack = {})
+        StageConfigurationScreen(filterName = "Home", filterType = FilterType.STAGES_7, onSave = {}, onBack = {})
     }
 }

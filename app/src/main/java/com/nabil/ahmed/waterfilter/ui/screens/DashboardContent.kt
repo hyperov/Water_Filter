@@ -1,10 +1,8 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +22,9 @@ import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.Filter
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithStages
 import com.nabil.ahmed.waterfilter.data.entity.Stage
+import com.nabil.ahmed.waterfilter.data.util.FilterType
+import com.nabil.ahmed.waterfilter.data.util.Lifespan
+import com.nabil.ahmed.waterfilter.data.util.StageNumber
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 
 @Composable
@@ -109,10 +110,10 @@ fun DashboardContentPreview() {
     WaterFilterTheme {
         DashboardContent(
             filter = FilterWithStages(
-                filter = Filter(1, "Home Filter", 7),
+                filter = Filter(1L, "Home Filter", FilterType.STAGES_7),
                 stages = listOf(
-                    Stage(1, 1, 1, "PP Filter", 90, System.currentTimeMillis()),
-                    Stage(2, 1, 2, "GAC Filter", 180, System.currentTimeMillis())
+                    Stage(1L, 1L, StageNumber.STAGE_1, "PP Filter", Lifespan.MONTHS_3, System.currentTimeMillis()),
+                    Stage(2L, 1L, StageNumber.STAGE_2, "GAC Filter", Lifespan.MONTHS_6, System.currentTimeMillis())
                 )
             ),
             onMarkAsChanged = {}

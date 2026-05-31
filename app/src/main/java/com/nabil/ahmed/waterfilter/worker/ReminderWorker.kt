@@ -30,7 +30,7 @@ class ReminderWorker @AssistedInject constructor(
         filters.forEach { filterWithStages ->
             filterWithStages.stages.forEach { stage ->
                 if (stage.lastChangedTimestamp != 0L) {
-                    val lifespanMillis = TimeUnit.DAYS.toMillis(stage.lifespanDays.toLong())
+                    val lifespanMillis = TimeUnit.DAYS.toMillis(stage.lifespanDays.days.toLong())
                     val expirationTime = stage.lastChangedTimestamp + lifespanMillis
                     val timeUntilExpiration = expirationTime - now
 

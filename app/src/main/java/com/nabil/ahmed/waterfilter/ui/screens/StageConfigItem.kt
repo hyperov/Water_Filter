@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nabil.ahmed.waterfilter.R
+import com.nabil.ahmed.waterfilter.data.util.Lifespan
+import com.nabil.ahmed.waterfilter.data.util.StageNumber
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import java.text.SimpleDateFormat
 import java.util.*
@@ -84,14 +86,16 @@ fun StageConfigItem(
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
-                        text = when (stage.lifespanDays) {
-                            90 -> stringResource(R.string.change_every_3_months)
-                            180 -> stringResource(R.string.change_every_6_months)
-                            365 -> stringResource(R.string.change_every_12_months)
-                            730 -> stringResource(R.string.change_every_24_months)
-                            else -> ""
-                        },
+                        text = stringResource(stage.lifespan.resId),
                         style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+                    Text(
+                        text = stringResource(stage.descriptionResId),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
@@ -142,7 +146,7 @@ fun StageConfigItem(
 @Preview
 @Composable
 fun StageConfigItemPreview() {
-    var stage by remember { mutableStateOf(StageConfigState(1, R.string.stage_pp, 90)) }
+    var stage by remember { mutableStateOf(StageConfigState(StageNumber.STAGE_1, R.string.stage_pp, R.string.stage_pp_desc, Lifespan.MONTHS_3)) }
     WaterFilterTheme {
         StageConfigItem(
             stage = stage,

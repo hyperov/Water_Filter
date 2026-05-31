@@ -29,7 +29,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,16 +39,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nabil.ahmed.waterfilter.R
+import com.nabil.ahmed.waterfilter.data.util.FilterType
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationScreen(
-    onNext: (name: String, stages: Int) -> Unit,
+    onNext: (name: String, stages: FilterType) -> Unit,
     onBack: () -> Unit
 ) {
     var filterName by remember { mutableStateOf("") }
-    var selectedStages by remember { mutableIntStateOf(3) }
+    var selectedStages by remember { mutableStateOf(FilterType.STAGES_3) }
 
     Scaffold(
         topBar = {
@@ -149,21 +149,21 @@ fun RegistrationScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StageOption(
-                    title = stringResource(R.string.stages_3),
-                    isSelected = selectedStages == 3,
-                    onClick = { selectedStages = 3 },
+                    title = stringResource(FilterType.STAGES_3.resId),
+                    isSelected = selectedStages == FilterType.STAGES_3,
+                    onClick = { selectedStages = FilterType.STAGES_3 },
                     modifier = Modifier.weight(1f)
                 )
                 StageOption(
-                    title = stringResource(R.string.stages_5),
-                    isSelected = selectedStages == 5,
-                    onClick = { selectedStages = 5 },
+                    title = stringResource(FilterType.STAGES_5.resId),
+                    isSelected = selectedStages == FilterType.STAGES_5,
+                    onClick = { selectedStages = FilterType.STAGES_5 },
                     modifier = Modifier.weight(1f)
                 )
                 StageOption(
-                    title = stringResource(R.string.stages_7),
-                    isSelected = selectedStages == 7,
-                    onClick = { selectedStages = 7 },
+                    title = stringResource(FilterType.STAGES_7.resId),
+                    isSelected = selectedStages == FilterType.STAGES_7,
+                    onClick = { selectedStages = FilterType.STAGES_7 },
                     modifier = Modifier.weight(1f)
                 )
             }
