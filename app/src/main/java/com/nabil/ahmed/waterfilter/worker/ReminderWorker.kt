@@ -22,13 +22,13 @@ class ReminderWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        val filters = dao.getAllFiltersWithStagesSync()
+        val filters = dao.getAllFiltersWithCandlesSync()
         
         val now = System.currentTimeMillis()
         val sevenDaysMillis = TimeUnit.DAYS.toMillis(7)
 
         filters.forEach { filterWithStages ->
-            filterWithStages.stages.forEach { stage ->
+            filterWithStages.candles.forEach { stage ->
                 if (stage.lastChangedTimestamp != 0L) {
                     val lifespanMillis = TimeUnit.DAYS.toMillis(stage.lifespanDays.days.toLong())
                     val expirationTime = stage.lastChangedTimestamp + lifespanMillis

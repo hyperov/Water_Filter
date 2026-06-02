@@ -1,37 +1,13 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.WaterDrop
-import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -45,11 +21,11 @@ import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationScreen(
-    onNext: (name: String, stages: FilterType) -> Unit,
+    onNext: (name: String, type: FilterType) -> Unit,
     onBack: () -> Unit
 ) {
     var filterName by remember { mutableStateOf("") }
-    var selectedStages by remember { mutableStateOf(FilterType.STAGES_3) }
+    var selectedType by remember { mutableStateOf(FilterType.CANDLES_3) }
 
     Scaffold(
         topBar = {
@@ -71,46 +47,16 @@ fun RegistrationScreen(
                             modifier = Modifier.size(20.dp)
                         )
                     }
-                },
-                actions = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Rounded.Close, contentDescription = stringResource(R.string.cancel))
-                    }
                 }
             )
-        },
-        bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                tonalElevation = 1.dp
-            ) {
-                Button(
-                    onClick = { if (filterName.isNotBlank()) onNext(filterName, selectedStages) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
-                        .navigationBarsPadding()
-                        .height(64.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    enabled = filterName.isNotBlank()
-                ) {
-                    Text(
-                        text = stringResource(R.string.next),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                }
-            }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
+                .padding(24.dp)
         ) {
-
-            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = stringResource(R.string.add_new_filter),
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
@@ -123,20 +69,18 @@ fun RegistrationScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Text(
-                text = stringResource(R.string.filter_name),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = filterName,
                 onValueChange = { filterName = it },
+                label = { Text(stringResource(R.string.filter_name)) },
                 placeholder = { Text(stringResource(R.string.filter_name_hint)) },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                leadingIcon = { Icon(Icons.Rounded.Edit, contentDescription = null) },
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = stringResource(R.string.filter_type),
@@ -148,24 +92,44 @@ fun RegistrationScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StageOption(
-                    title = stringResource(FilterType.STAGES_3.resId),
-                    isSelected = selectedStages == FilterType.STAGES_3,
-                    onClick = { selectedStages = FilterType.STAGES_3 },
+                CandleOption(
+                    title = stringResource(R.string.candles_3),
+                    isSelected = selectedType == FilterType.CANDLES_3,
+                    onClick = { selectedType = FilterType.CANDLES_3 },
                     modifier = Modifier.weight(1f)
                 )
-                StageOption(
-                    title = stringResource(FilterType.STAGES_5.resId),
-                    isSelected = selectedStages == FilterType.STAGES_5,
-                    onClick = { selectedStages = FilterType.STAGES_5 },
+                CandleOption(
+                    title = stringResource(R.string.candles_5),
+                    isSelected = selectedType == FilterType.CANDLES_5,
+                    onClick = { selectedType = FilterType.CANDLES_5 },
                     modifier = Modifier.weight(1f)
                 )
-                StageOption(
-                    title = stringResource(FilterType.STAGES_7.resId),
-                    isSelected = selectedStages == FilterType.STAGES_7,
-                    onClick = { selectedStages = FilterType.STAGES_7 },
+                CandleOption(
+                    title = stringResource(R.string.candles_7),
+                    isSelected = selectedType == FilterType.CANDLES_7,
+                    onClick = { selectedType = FilterType.CANDLES_7 },
                     modifier = Modifier.weight(1f)
                 )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = { if (filterName.isNotBlank()) onNext(filterName, selectedType) },
+                enabled = filterName.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.next),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(imageVector = Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null)
+                }
             }
         }
     }
@@ -173,7 +137,7 @@ fun RegistrationScreen(
 
 @Preview(showBackground = true, locale = "ar")
 @Composable
-fun RegistrationPreview() {
+fun RegistrationScreenPreview() {
     WaterFilterTheme {
         RegistrationScreen(onNext = { _, _ -> }, onBack = {})
     }

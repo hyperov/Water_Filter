@@ -83,7 +83,7 @@ fun HistoryLogCard(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = log.stageName,
+                        text = log.candleName,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }

@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class MaintenanceLog(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val filterId: Long,
-    val stageNumber: Int,
-    val stageName: String,
+    val candleNumber: Int,
+    val candleName: String,
     val changeDateTimestamp: Long
 )

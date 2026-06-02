@@ -3,10 +3,7 @@ package com.nabil.ahmed.waterfilter.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nabil.ahmed.waterfilter.data.dao.FilterDao
-import com.nabil.ahmed.waterfilter.data.entity.Filter
-import com.nabil.ahmed.waterfilter.data.entity.FilterWithStages
-import com.nabil.ahmed.waterfilter.data.entity.MaintenanceLog
-import com.nabil.ahmed.waterfilter.data.entity.Stage
+import com.nabil.ahmed.waterfilter.data.entity.*
 import com.nabil.ahmed.waterfilter.data.util.FilterType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,30 +17,30 @@ class WaterFilterViewModel @Inject constructor(
     private val dao: FilterDao
 ) : ViewModel() {
 
-    val allFiltersWithStages: StateFlow<List<FilterWithStages>> = dao.getAllFiltersWithStages()
+    val allFiltersWithCandles: StateFlow<List<FilterWithCandles>> = dao.getAllFiltersWithCandles()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val allMaintenanceLogs: StateFlow<List<MaintenanceLog>> = dao.getAllMaintenanceLogs()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun saveFilter(name: String, type: FilterType, stages: List<Stage>) {
+    fun saveFilter(name: String, type: FilterType, candles: List<Candle>) {
         viewModelScope.launch {
             val filterId = dao.insertFilter(Filter(name = name, type = type))
-            val stagesWithId = stages.map { it.copy(filterId = filterId) }
-            dao.insertStages(stagesWithId)
+            val candlesWithId = candles.map { it.copy(filterId = filterId) }
+            dao.insertCandles(candlesWithId)
         }
     }
 
-    fun updateStage(stage: Stage) {
+    fun updateCandle(candle: Candle) {
         viewModelScope.launch {
-            val updatedStage = stage.copy(lastChangedTimestamp = System.currentTimeMillis())
-            dao.updateStage(updatedStage)
+            val updatedCandle = candle.copy(lastChangedTimestamp = System.currentTimeMillis())
+            dao.updateCandle(updatedCandle)
             
             val log = MaintenanceLog(
-                filterId = stage.filterId,
-                stageNumber = stage.stageNumber.value,
-                stageName = stage.name,
-                changeDateTimestamp = updatedStage.lastChangedTimestamp
+                filterId = candle.filterId,
+                candleNumber = candle.candleNumber.value,
+                candleName = candle.name,
+                changeDateTimestamp = updatedCandle.lastChangedTimestamp
             )
             dao.insertMaintenanceLog(log)
         }
@@ -52,6 +49,12 @@ class WaterFilterViewModel @Inject constructor(
     fun deleteMaintenanceLog(log: MaintenanceLog) {
         viewModelScope.launch {
             dao.deleteMaintenanceLog(log)
+        }
+    }
+
+    fun deleteFilter(filter: Filter) {
+        viewModelScope.launch {
+            dao.deleteFilter(filter)
         }
     }
 }

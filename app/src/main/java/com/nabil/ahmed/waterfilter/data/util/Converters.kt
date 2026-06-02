@@ -4,10 +4,10 @@ import androidx.room.TypeConverter
 
 class Converters {
     @TypeConverter
-    fun fromStageNumber(value: StageNumber): Int = value.value
+    fun fromCandleNumber(value: CandleNumber): Int = value.value
 
     @TypeConverter
-    fun toStageNumber(value: Int): StageNumber = StageNumber.fromInt(value)
+    fun toCandleNumber(value: Int): CandleNumber = CandleNumber.fromInt(value)
 
     @TypeConverter
     fun fromLifespan(value: Lifespan): Int = value.days
@@ -16,7 +16,7 @@ class Converters {
     fun toLifespan(value: Int): Lifespan = Lifespan.fromDays(value)
 
     @TypeConverter
-    fun fromFilterType(value: FilterType): Int = value.stagesCount
+    fun fromFilterType(value: FilterType): Int = value.candlesCount
 
     @TypeConverter
     fun toFilterType(value: Int): FilterType = FilterType.fromInt(value)

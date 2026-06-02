@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.Filter
-import com.nabil.ahmed.waterfilter.data.entity.FilterWithStages
+import com.nabil.ahmed.waterfilter.data.entity.FilterWithCandles
 import com.nabil.ahmed.waterfilter.data.entity.MaintenanceLog
 import com.nabil.ahmed.waterfilter.data.util.FilterType
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
@@ -32,23 +32,24 @@ import java.util.*
 
 @Composable
 fun HistoryScreen(
-    viewModel: WaterFilterViewModel,
+    viewModel: WaterFilterViewModel
 ) {
     val logs by viewModel.allMaintenanceLogs.collectAsStateWithLifecycle()
-    val filters by viewModel.allFiltersWithStages.collectAsStateWithLifecycle()
+    val filters by viewModel.allFiltersWithCandles.collectAsStateWithLifecycle()
 
     HistoryScreenContent(
         logs = logs,
         filters = filters,
-    ) { viewModel.deleteMaintenanceLog(it) }
+        onDeleteLog = { viewModel.deleteMaintenanceLog(it) }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreenContent(
     logs: List<MaintenanceLog>,
-    filters: List<FilterWithStages>,
-    onDeleteLog: (MaintenanceLog) -> Unit,
+    filters: List<FilterWithCandles>,
+    onDeleteLog: (MaintenanceLog) -> Unit
 ) {
     var selectedFilterId by remember { mutableLongStateOf(-1L) } // -1 for All
 
@@ -104,11 +105,11 @@ fun HistoryScreenContent(
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
 
-                filters.forEach { filterWithStages ->
+                filters.forEach { filterWithCandles ->
                     FilterChip(
-                        selected = selectedFilterId == filterWithStages.filter.id,
-                        onClick = { selectedFilterId = filterWithStages.filter.id },
-                        label = { Text(filterWithStages.filter.name) },
+                        selected = selectedFilterId == filterWithCandles.filter.id,
+                        onClick = { selectedFilterId = filterWithCandles.filter.id },
+                        label = { Text(filterWithCandles.filter.name) },
                         modifier = Modifier.padding(horizontal = 4.dp)
                     )
                 }
@@ -164,19 +165,19 @@ fun HistoryScreenContent(
 @Composable
 fun HistoryScreenPreview() {
     val sampleFilters = listOf(
-        FilterWithStages(
-            filter = Filter(id = 1, name = "Home Filter", type = FilterType.STAGES_3),
-            stages = emptyList()
+        FilterWithCandles(
+            filter = Filter(id = 1, name = "Home Filter", type = FilterType.CANDLES_3),
+            candles = emptyList()
         ),
-        FilterWithStages(
-            filter = Filter(id = 2, name = "Office Filter", type = FilterType.STAGES_5),
-            stages = emptyList()
+        FilterWithCandles(
+            filter = Filter(id = 2, name = "Office Filter", type = FilterType.CANDLES_5),
+            candles = emptyList()
         )
     )
     val sampleLogs = listOf(
-        MaintenanceLog(id = 1, filterId = 1, stageNumber = 1, stageName = "PP Filter", changeDateTimestamp = System.currentTimeMillis()),
-        MaintenanceLog(id = 2, filterId = 1, stageNumber = 2, stageName = "GAC Filter", changeDateTimestamp = System.currentTimeMillis() - (86400000L * 30)),
-        MaintenanceLog(id = 3, filterId = 2, stageNumber = 1, stageName = "PP Filter", changeDateTimestamp = System.currentTimeMillis() - (86400000L * 5))
+        MaintenanceLog(id = 1, filterId = 1, candleNumber = 1, candleName = "PP Filter", changeDateTimestamp = System.currentTimeMillis()),
+        MaintenanceLog(id = 2, filterId = 1, candleNumber = 2, candleName = "GAC Filter", changeDateTimestamp = System.currentTimeMillis() - (86400000L * 30)),
+        MaintenanceLog(id = 3, filterId = 2, candleNumber = 1, candleName = "PP Filter", changeDateTimestamp = System.currentTimeMillis() - (86400000L * 5))
     )
 
     WaterFilterTheme {

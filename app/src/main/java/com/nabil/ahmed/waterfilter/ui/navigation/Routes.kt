@@ -13,7 +13,7 @@ sealed class Route : NavKey {
     data object FilterRegistration : Route()
 
     @Serializable
-    data class StageConfiguration(val filterName: String, val filterType: FilterType) : Route()
+    data class CandleConfiguration(val filterName: String, val filterType: FilterType) : Route()
 
     @Serializable
     data object Dashboard : Route()
