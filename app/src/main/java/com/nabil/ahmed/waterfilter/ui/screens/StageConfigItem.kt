@@ -104,6 +104,15 @@ fun StageConfigItem(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 0.5.dp)
             Spacer(modifier = Modifier.height(16.dp))
 
+            Text(
+                text = stringResource(R.string.last_maintenance_question),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium
+                ),
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -118,11 +127,7 @@ fun StageConfigItem(
 
                 // Specific Date
                 DateChip(
-                    text = if (stage.selection == SelectionType.SPECIFIC_DATE && stage.lastChangedTimestamp != null) {
-                        SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(stage.lastChangedTimestamp!!))
-                    } else {
-                        stringResource(R.string.specific_date)
-                    },
+                    text = stringResource(R.string.specific_date),
                     isSelected = stage.selection == SelectionType.SPECIFIC_DATE,
                     onClick = { showDatePicker = true },
                     modifier = Modifier.weight(1f),
@@ -136,17 +141,57 @@ fun StageConfigItem(
             DateChip(
                 text = stringResource(R.string.dont_remember),
                 isSelected = stage.selection == SelectionType.DONT_REMEMBER,
-                onClick = { onSelectionChanged(SelectionType.DONT_REMEMBER, null) },
+                onClick = {
+                    val estimatedTimestamp = System.currentTimeMillis() - (stage.lifespan.days.toLong() * 24 * 60 * 60 * 1000 / 2)
+                    onSelectionChanged(SelectionType.DONT_REMEMBER, estimatedTimestamp)
+                },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Selected Date Footnote
+            if (stage.lastChangedTimestamp != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.selected_date) + ": ",
+                            style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        )
+                        Text(
+                            text = SimpleDateFormat("dd MMM yyyy", Locale.forLanguageTag("ar")).format(Date(stage.lastChangedTimestamp)),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    }
+                    
+                    if (stage.selection == SelectionType.DONT_REMEMBER) {
+                        Text(
+                            text = stringResource(R.string.estimated_date_note),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontWeight = FontWeight.Normal
+                            ),
+                            modifier = Modifier.padding(top = 4.dp),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
-@Preview
+@Preview(locale = "ar")
 @Composable
 fun StageConfigItemPreview() {
-    var stage by remember { mutableStateOf(StageConfigState(StageNumber.STAGE_1, R.string.stage_pp, R.string.stage_pp_desc, Lifespan.MONTHS_3)) }
+    var stage by remember { mutableStateOf(StageConfigState(StageNumber.STAGE_1, R.string.stage_pp, R.string.stage_pp_desc, Lifespan.MONTHS_3, System.currentTimeMillis() - (Lifespan.MONTHS_3.days.toLong() * 24 * 60 * 60 * 1000 / 2), SelectionType.DONT_REMEMBER)) }
     WaterFilterTheme {
         StageConfigItem(
             stage = stage,

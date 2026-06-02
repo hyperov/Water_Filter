@@ -121,7 +121,7 @@ fun HistoryLogCard(
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(log.changeDateTimestamp)),
+                        text = SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("ar")).format(Date(log.changeDateTimestamp)),
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
                     )
                     Spacer(modifier = Modifier.width(4.dp))

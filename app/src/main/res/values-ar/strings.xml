@@ -75,4 +75,7 @@
     <string name="stage_mineral_desc">المعادن: إضافة الأملاح المعدنية الضرورية للجسم.</string>
     <string name="stage_alkaline_desc">الألكالين: ضبط درجة القلوية وتحسين جودة المياه.</string>
     <string name="back">رجوع</string>
+    <string name="selected_date">التاريخ المختار</string>
+    <string name="estimated_date_note">لقد اخترنا هذا التاريخ بناءً على منتصف العمر الافتراضي للشمعة لضمان دقة التنبيهات القادمة.</string>
+    <string name="last_maintenance_question">متى كانت آخر مرة قمت فيها بتغيير هذه الشمعة؟</string>
 </resources>

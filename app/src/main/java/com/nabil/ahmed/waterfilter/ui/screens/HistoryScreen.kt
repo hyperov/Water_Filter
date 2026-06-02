@@ -61,7 +61,7 @@ fun HistoryScreenContent(
     val groupedLogs = remember(filteredLogs) {
         filteredLogs.groupBy { log ->
             val date = Date(log.changeDateTimestamp)
-            val sdf = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+            val sdf = SimpleDateFormat("MMMM yyyy", Locale.forLanguageTag("ar"))
             sdf.format(date)
         }
     }

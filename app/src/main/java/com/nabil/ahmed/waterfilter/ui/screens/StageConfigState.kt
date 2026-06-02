@@ -8,8 +8,8 @@ data class StageConfigState(
     val nameResId: Int,
     val descriptionResId: Int,
     val lifespan: Lifespan,
-    val lastChangedTimestamp: Long? = null,
-    val selection: SelectionType = SelectionType.DONT_REMEMBER
+    val lastChangedTimestamp: Long? = System.currentTimeMillis(),
+    val selection: SelectionType = SelectionType.TODAY
 )
 
 enum class SelectionType {
