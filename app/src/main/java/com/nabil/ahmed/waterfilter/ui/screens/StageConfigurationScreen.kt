@@ -147,7 +147,7 @@ fun StageConfigurationScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true,locale = "ar")
 @Composable
 fun StageConfigurationPreview() {
     WaterFilterTheme {

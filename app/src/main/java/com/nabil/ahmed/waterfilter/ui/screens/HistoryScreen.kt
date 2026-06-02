@@ -17,23 +17,41 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nabil.ahmed.waterfilter.R
+import com.nabil.ahmed.waterfilter.data.entity.Filter
+import com.nabil.ahmed.waterfilter.data.entity.FilterWithStages
+import com.nabil.ahmed.waterfilter.data.entity.MaintenanceLog
+import com.nabil.ahmed.waterfilter.data.util.FilterType
+import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    viewModel: WaterFilterViewModel
+    viewModel: WaterFilterViewModel,
 ) {
     val logs by viewModel.allMaintenanceLogs.collectAsStateWithLifecycle()
     val filters by viewModel.allFiltersWithStages.collectAsStateWithLifecycle()
-    
+
+    HistoryScreenContent(
+        logs = logs,
+        filters = filters,
+    ) { viewModel.deleteMaintenanceLog(it) }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HistoryScreenContent(
+    logs: List<MaintenanceLog>,
+    filters: List<FilterWithStages>,
+    onDeleteLog: (MaintenanceLog) -> Unit,
+) {
     var selectedFilterId by remember { mutableLongStateOf(-1L) } // -1 for All
-    
+
     val filteredLogs = if (selectedFilterId == -1L) {
         logs
     } else {
@@ -85,7 +103,7 @@ fun HistoryScreen(
                     label = { Text(stringResource(R.string.all)) },
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
-                
+
                 filters.forEach { filterWithStages ->
                     FilterChip(
                         selected = selectedFilterId == filterWithStages.filter.id,
@@ -132,12 +150,40 @@ fun HistoryScreen(
                             HistoryLogCard(
                                 log = log,
                                 filterName = filters.find { it.filter.id == log.filterId }?.filter?.name ?: "",
-                                onDelete = { viewModel.deleteMaintenanceLog(log) }
+                                onDelete = { onDeleteLog(log) }
                             )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HistoryScreenPreview() {
+    val sampleFilters = listOf(
+        FilterWithStages(
+            filter = Filter(id = 1, name = "Home Filter", type = FilterType.STAGES_3),
+            stages = emptyList()
+        ),
+        FilterWithStages(
+            filter = Filter(id = 2, name = "Office Filter", type = FilterType.STAGES_5),
+            stages = emptyList()
+        )
+    )
+    val sampleLogs = listOf(
+        MaintenanceLog(id = 1, filterId = 1, stageNumber = 1, stageName = "PP Filter", changeDateTimestamp = System.currentTimeMillis()),
+        MaintenanceLog(id = 2, filterId = 1, stageNumber = 2, stageName = "GAC Filter", changeDateTimestamp = System.currentTimeMillis() - (86400000L * 30)),
+        MaintenanceLog(id = 3, filterId = 2, stageNumber = 1, stageName = "PP Filter", changeDateTimestamp = System.currentTimeMillis() - (86400000L * 5))
+    )
+
+    WaterFilterTheme {
+        HistoryScreenContent(
+            logs = sampleLogs,
+            filters = sampleFilters,
+            onDeleteLog = {}
+        )
     }
 }
