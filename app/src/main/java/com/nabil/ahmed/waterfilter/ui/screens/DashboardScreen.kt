@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -27,22 +29,71 @@ fun DashboardScreen(
     onAddFilter: () -> Unit
 ) {
     val filters by viewModel.allFiltersWithCandles.collectAsStateWithLifecycle()
+    val selectedFilterId by viewModel.selectedFilterId.collectAsStateWithLifecycle()
+
+    var showDeleteConfirmation by remember { mutableStateOf<Filter?>(null) }
 
     DashboardScreenContent(
         filters = filters,
+        selectedFilterId = selectedFilterId,
+        onFilterSelected = { viewModel.selectFilter(it) },
         onAddFilter = onAddFilter,
+        onDeleteFilter = { showDeleteConfirmation = it },
         onMarkAsChanged = { viewModel.updateCandle(it) }
     )
+
+    showDeleteConfirmation?.let { filter ->
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = null },
+            title = { Text(text = stringResource(R.string.delete_filter_confirm_title)) },
+            text = {
+                Text(
+                    text = stringResource(
+                        R.string.delete_filter_confirm_message,
+                        filter.name
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteFilter(filter)
+                        showDeleteConfirmation = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(text = stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = null }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreenContent(
     filters: List<FilterWithCandles>,
+    selectedFilterId: Long?,
+    onFilterSelected: (Long) -> Unit,
     onAddFilter: () -> Unit,
+    onDeleteFilter: (Filter) -> Unit,
     onMarkAsChanged: (Candle) -> Unit
 ) {
-    var selectedFilterIndex by remember { mutableIntStateOf(0) }
+    var showMenu by remember { mutableStateOf(false) }
+    
+    val selectedFilterIndex = remember(filters, selectedFilterId) {
+        if (selectedFilterId != null) {
+            val index = filters.indexOfFirst { it.filter.id == selectedFilterId }
+            if (index != -1) index else 0
+        } else {
+            0
+        }
+    }
 
     val currentFilter = filters.getOrNull(selectedFilterIndex)
 
@@ -62,6 +113,42 @@ fun DashboardScreenContent(
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
+                    }
+                },
+                actions = {
+                    if (currentFilter != null) {
+                        Box {
+                            IconButton(onClick = { showMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.MoreVert,
+                                    contentDescription = stringResource(R.string.settings)
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { 
+                                        Text(
+                                            text = stringResource(R.string.delete_filter),
+                                            color = MaterialTheme.colorScheme.error
+                                        ) 
+                                    },
+                                    onClick = {
+                                        showMenu = false
+                                        onDeleteFilter(currentFilter.filter)
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Delete,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             )
@@ -95,7 +182,7 @@ fun DashboardScreenContent(
                     filters.forEachIndexed { index, filterWithCandles ->
                         Tab(
                             selected = selectedFilterIndex == index,
-                            onClick = { selectedFilterIndex = index },
+                            onClick = { onFilterSelected(filterWithCandles.filter.id) },
                             text = {
                                 Text(
                                     text = filterWithCandles.filter.name,
@@ -128,7 +215,10 @@ fun DashboardScreenPreview() {
                     candles = emptyList()
                 )
             ),
+            selectedFilterId = 1L,
+            onFilterSelected = {},
             onAddFilter = {},
+            onDeleteFilter = {},
             onMarkAsChanged = {}
         )
     }

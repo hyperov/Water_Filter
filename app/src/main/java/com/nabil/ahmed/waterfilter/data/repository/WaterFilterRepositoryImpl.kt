@@ -20,10 +20,11 @@ class WaterFilterRepositoryImpl @Inject constructor(
         return dao.getAllMaintenanceLogs()
     }
 
-    override suspend fun saveFilter(name: String, type: FilterType, candles: List<Candle>) {
+    override suspend fun saveFilter(name: String, type: FilterType, candles: List<Candle>): Long {
         val filterId = dao.insertFilter(Filter(name = name, type = type))
         val candlesWithId = candles.map { it.copy(filterId = filterId) }
         dao.insertCandles(candlesWithId)
+        return filterId
     }
 
     override suspend fun updateCandle(candle: Candle) {
