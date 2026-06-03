@@ -53,7 +53,7 @@ fun CandlesConfigurationScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.candles_history),
+                        text = stringResource(R.string.candles_setup),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },

@@ -30,6 +30,7 @@
     <string name="candles_7">7 شمعات</string>
     <string name="next">التالي</string>
     <string name="candles_history">تاريخ الشمعات</string>
+    <string name="step_1_of_2">الخطوة 1 من 2</string>
     <string name="step_2_of_2">الخطوة 2 من 2</string>
     <string name="candles_setup">إعداد الشمعات</string>
     <string name="candles_setup_desc">متى قمت بتغيير كل شمعة آخر مرة؟ سيساعدنا ذلك في تنبيهك للمواعيد القادمة بدقة.</string>
