@@ -11,7 +11,7 @@ import com.nabil.ahmed.waterfilter.data.util.Converters
 
 @Database(
     entities = [Filter::class, Candle::class, MaintenanceLog::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -28,7 +28,8 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "water_filter_db"
-                ).build()
+                ).fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }
