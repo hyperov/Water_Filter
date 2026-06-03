@@ -2,6 +2,7 @@ package com.nabil.ahmed.waterfilter.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entryProvider
@@ -19,6 +20,7 @@ fun AppNavigation(
     backStack: NavBackStack<Route>
 ) {
     val viewModel: WaterFilterViewModel = hiltViewModel()
+    val context = LocalContext.current
 
     val myEntryProvider = remember {
         entryProvider {
@@ -45,13 +47,17 @@ fun AppNavigation(
                             Candle(
                                 filterId = 0L,
                                 candleNumber = config.candleNumber,
-                                name = "res", // placeholder, we might need a way to get the actual name
+                                name = context.getString(config.nameResId),
                                 lifespanDays = config.lifespan,
                                 lastChangedTimestamp = config.lastChangedTimestamp ?: System.currentTimeMillis()
                             )
                         }
-                        // We need a way to actually save these, maybe via viewModel
-                        // viewModel.saveFilter(route.filterName, route.filterType, candles)
+                        viewModel.saveFilter(route.filterName, route.filterType, candles)
+                        
+                        // Clear the registration flow from backstack and go to Dashboard
+                        while(backStack.size > 0 && (backStack.last() is Route.FilterRegistration || backStack.last() is Route.CandleConfiguration)) {
+                            backStack.removeLastOrNull()
+                        }
                         backStack.add(Route.Dashboard)
                     }
                 )
