@@ -6,11 +6,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entryProvider
 import com.nabil.ahmed.waterfilter.data.entity.Candle
-import com.nabil.ahmed.waterfilter.ui.screens.CandleConfigurationScreen
+import com.nabil.ahmed.waterfilter.ui.screens.CandlesConfigurationScreen
 import com.nabil.ahmed.waterfilter.ui.screens.DashboardScreen
 import com.nabil.ahmed.waterfilter.ui.screens.HistoryScreen
 import com.nabil.ahmed.waterfilter.ui.screens.OnboardingScreen
-import com.nabil.ahmed.waterfilter.ui.screens.RegistrationScreen
+import com.nabil.ahmed.waterfilter.ui.screens.FilterRegistrationScreen
 import com.nabil.ahmed.waterfilter.ui.screens.SettingsScreen
 import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
 
@@ -28,7 +28,7 @@ fun AppNavigation(
                 })
             }
             entry<Route.FilterRegistration> {
-                RegistrationScreen(
+                FilterRegistrationScreen(
                     onNext = { name, type ->
                         backStack.add(Route.CandleConfiguration(name, type))
                     },
@@ -36,7 +36,7 @@ fun AppNavigation(
                 )
             }
             entry<Route.CandleConfiguration> { route ->
-                CandleConfigurationScreen(
+                CandlesConfigurationScreen(
                     filterName = route.filterName,
                     filterType = route.filterType,
                     onBack = { backStack.removeLastOrNull() },

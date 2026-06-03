@@ -20,7 +20,7 @@ import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationScreen(
+fun FilterRegistrationScreen(
     onNext: (name: String, type: FilterType) -> Unit,
     onBack: () -> Unit
 ) {
@@ -137,8 +137,8 @@ fun RegistrationScreen(
 
 @Preview(showBackground = true, locale = "ar")
 @Composable
-fun RegistrationScreenPreview() {
+fun FilterRegistrationScreenPreview() {
     WaterFilterTheme {
-        RegistrationScreen(onNext = { _, _ -> }, onBack = {})
+        FilterRegistrationScreen(onNext = { _, _ -> }, onBack = {})
     }
 }

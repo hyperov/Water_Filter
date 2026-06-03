@@ -78,4 +78,5 @@
     <string name="selected_date">التاريخ المختار</string>
     <string name="estimated_date_note">لقد اخترنا هذا التاريخ بناءً على منتصف العمر الافتراضي للشمعة لضمان دقة التنبيهات القادمة.</string>
     <string name="last_maintenance_question">متى كانت آخر مرة قمت فيها بتغيير هذه الشمعة؟</string>
+    <string name="set_all_today">تعيين الكل كأنه تم تغييره اليوم</string>
 </resources>

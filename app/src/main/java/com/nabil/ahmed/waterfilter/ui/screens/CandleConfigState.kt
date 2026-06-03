@@ -8,10 +8,10 @@ data class CandleConfigState(
     val nameResId: Int,
     val descriptionResId: Int,
     val lifespan: Lifespan,
-    val lastChangedTimestamp: Long? = System.currentTimeMillis(),
-    val selection: SelectionType = SelectionType.TODAY
+    val lastChangedTimestamp: Long? = null,
+    val selection: SelectionType = SelectionType.NONE
 )
 
 enum class SelectionType {
-    TODAY, SPECIFIC_DATE, DONT_REMEMBER
+    NONE, TODAY, SPECIFIC_DATE, DONT_REMEMBER
 }
