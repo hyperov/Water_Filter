@@ -39,9 +39,7 @@ fun CandleHealthCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (healthInfo.healthPercentage <= 20f)
-                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
-            else MaterialTheme.colorScheme.surface
+            containerColor = healthColor.copy(alpha = 0.2f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         border =
@@ -119,7 +117,7 @@ fun CandleHealthCard(
                     .height(12.dp)
                     .clip(CircleShape),
                 color = healthColor,
-                trackColor = healthColor.copy(alpha = 0.1f)
+                trackColor = healthColor.copy(alpha = 0.3f)
             )
             
             Spacer(modifier = Modifier.height(12.dp))
