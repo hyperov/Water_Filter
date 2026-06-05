@@ -152,8 +152,19 @@ fun DashboardScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        datePickerState.selectedDateMillis?.let {
-                            viewModel.updateCandle(candle, it)
+                        datePickerState.selectedDateMillis?.let { newTimestamp ->
+                            val oldTimestamp = candle.lastChangedTimestamp
+                            viewModel.updateCandle(candle, newTimestamp)
+                            scope.launch {
+                                val result = snackbarHostState.showSnackbar(
+                                    message = "تم تحديث التاريخ بنجاح",
+                                    actionLabel = "تراجع",
+                                    duration = SnackbarDuration.Short
+                                )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    viewModel.updateCandle(candle, oldTimestamp)
+                                }
+                            }
                         }
                         editingCandle = null
                     }
@@ -365,11 +376,11 @@ fun DashboardScreenContent(
                         FilterChip(
                             selected = isSelected,
                             onClick = { onFilterSelected(filterWithCandles.filter.id) },
-                            label = { 
+                            label = {
                                 Text(
                                     text = filterWithCandles.filter.name,
                                     style = MaterialTheme.typography.labelLarge
-                                ) 
+                                )
                             },
                             shape = RoundedCornerShape(12.dp),
                             colors = FilterChipDefaults.filterChipColors(
