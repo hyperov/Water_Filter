@@ -118,7 +118,7 @@ fun DashboardScreen(
 
                 scope.launch {
                     val result = snackbarHostState.showSnackbar(
-                        message = "تم تحديث الشمعة بنجاح",
+                        message = "تم تغيير الشمعة اليوم بنجاح",
                         actionLabel = "تراجع",
                         duration = SnackbarDuration.Short
                     )
