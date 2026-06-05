@@ -1,6 +1,7 @@
 package com.nabil.ahmed.waterfilter.ui.navigation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.History
@@ -10,55 +11,69 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import com.nabil.ahmed.waterfilter.R
 
 @Composable
 fun MainLayout(
     backStack: NavBackStack<Route>,
-    currentRoute: Route,
     content: @Composable () -> Unit
 ) {
+    val currentRoute = backStack.last()
+    val showBottomBar = currentRoute is Route.Dashboard || 
+                       currentRoute is Route.MaintenanceHistory || 
+                       currentRoute is Route.Settings
+
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = currentRoute == Route.Dashboard,
-                    onClick = {
-                        if (currentRoute != Route.Dashboard) {
-                            backStack.removeLastOrNull()
-                            backStack.add(Route.Dashboard)
-                        }
-                    },
-                    icon = { Icon(Icons.Rounded.Home, contentDescription = null) },
-                    label = { Text(stringResource(R.string.dashboard)) }
-                )
-                NavigationBarItem(
-                    selected = currentRoute == Route.MaintenanceHistory,
-                    onClick = {
-                        if (currentRoute != Route.MaintenanceHistory) {
-                            backStack.removeLastOrNull()
-                            backStack.add(Route.MaintenanceHistory)
-                        }
-                    },
-                    icon = { Icon(Icons.Rounded.History, contentDescription = null) },
-                    label = { Text(stringResource(R.string.history)) }
-                )
-                NavigationBarItem(
-                    selected = currentRoute == Route.Settings,
-                    onClick = {
-                        if (currentRoute != Route.Settings) {
-                            backStack.removeLastOrNull()
-                            backStack.add(Route.Settings)
-                        }
-                    },
-                    icon = { Icon(Icons.Rounded.Settings, contentDescription = null) },
-                    label = { Text(stringResource(R.string.settings)) }
-                )
+            if (showBottomBar) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp
+                ) {
+                    NavigationBarItem(
+                        selected = currentRoute is Route.Dashboard,
+                        onClick = {
+                            if (currentRoute !is Route.Dashboard) {
+                                while (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                }
+                                if (backStack.last() !is Route.Dashboard) {
+                                    backStack.add(Route.Dashboard)
+                                }
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.Home, contentDescription = null) },
+                        label = { Text(stringResource(R.string.dashboard)) }
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute is Route.MaintenanceHistory,
+                        onClick = {
+                            if (currentRoute !is Route.MaintenanceHistory) {
+                                backStack.add(Route.MaintenanceHistory)
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.History, contentDescription = null) },
+                        label = { Text(stringResource(R.string.history)) }
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute is Route.Settings,
+                        onClick = {
+                            if (currentRoute !is Route.Settings) {
+                                backStack.add(Route.Settings)
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.Settings, contentDescription = null) },
+                        label = { Text(stringResource(R.string.settings)) }
+                    )
+                }
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)) {
             content()
         }
     }

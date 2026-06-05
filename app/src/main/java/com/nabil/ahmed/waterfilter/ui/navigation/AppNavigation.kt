@@ -1,11 +1,21 @@
 package com.nabil.ahmed.waterfilter.ui.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entryProvider
+import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.Candle
 import com.nabil.ahmed.waterfilter.ui.screens.CandlesConfigurationScreen
 import com.nabil.ahmed.waterfilter.ui.screens.DashboardScreen
@@ -55,7 +65,7 @@ fun AppNavigation(
                         viewModel.saveFilter(route.filterName, route.filterType, candles)
                         
                         // Clear the registration flow from backstack and go to Dashboard
-                        while(backStack.size > 0 && (backStack.last() is Route.FilterRegistration || backStack.last() is Route.CandleConfiguration)) {
+                        while(backStack.isNotEmpty() && (backStack.last() is Route.FilterRegistration || backStack.last() is Route.CandleConfiguration)) {
                             backStack.removeLastOrNull()
                         }
                         backStack.add(Route.Dashboard)
@@ -77,8 +87,59 @@ fun AppNavigation(
         }
     }
 
-    androidx.navigation3.ui.NavDisplay(
-        backStack = backStack,
-        entryProvider = myEntryProvider
-    )
+    val currentRoute = backStack.last()
+    val showBottomBar = currentRoute is Route.Dashboard || 
+                       currentRoute is Route.MaintenanceHistory || 
+                       currentRoute is Route.Settings
+
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = currentRoute is Route.Dashboard,
+                        onClick = {
+                            if (currentRoute !is Route.Dashboard) {
+                                while (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                }
+                                if (backStack.last() !is Route.Dashboard) {
+                                    backStack.add(Route.Dashboard)
+                                }
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.Home, contentDescription = null) },
+                        label = { Text(stringResource(R.string.dashboard)) }
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute is Route.MaintenanceHistory,
+                        onClick = {
+                            if (currentRoute !is Route.MaintenanceHistory) {
+                                backStack.add(Route.MaintenanceHistory)
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.History, contentDescription = null) },
+                        label = { Text(stringResource(R.string.history)) }
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute is Route.Settings,
+                        onClick = {
+                            if (currentRoute !is Route.Settings) {
+                                backStack.add(Route.Settings)
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.Settings, contentDescription = null) },
+                        label = { Text(stringResource(R.string.settings)) }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            androidx.navigation3.ui.NavDisplay(
+                backStack = backStack,
+                entryProvider = myEntryProvider
+            )
+        }
+    }
 }
