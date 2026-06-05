@@ -73,7 +73,6 @@ fun getHealthColor(percentage: Int): Color {
     return when {
         percentage > 60 -> Color(0xFF4CAF50) // Green (Safe)
         percentage > 25 -> Color(0xFFFFC107) // Amber (Warning)
-        percentage > 0 -> Color(0xFFFF9800)  // Orange (Critical)
         else -> MaterialTheme.colorScheme.error // Red (Overdue)
     }
 }

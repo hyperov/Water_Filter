@@ -39,14 +39,13 @@ fun CandleHealthCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (healthInfo.healthPercentage <= 20f) 
-                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) 
+            containerColor = if (healthInfo.healthPercentage <= 20f)
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
             else MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = if (healthInfo.healthPercentage <= 20f) 
-            androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)) 
-            else null
+        border =
+            androidx.compose.foundation.BorderStroke(2.dp, healthColor.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Row(
