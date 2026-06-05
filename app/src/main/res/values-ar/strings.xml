@@ -65,7 +65,7 @@
     <string name="mark_as_changed">تم التغيير</string>
     <string name="remaining_days">باقي %1$d يوم</string>
     <string name="remaining_months">باقي %1$d شهر</string>
-    <string name="overdue">انتهى موعد التغيير!</string>
+    <string name="overdue">موعد تغيير الشمعة فات!</string>
     <string name="add_filter">إضافة فلتر</string>
     <string name="ok">موافق</string>
     <string name="candle_pp_desc">شمعة الشوائب: لإزالة الرمل والصدأ والعوالق.</string>

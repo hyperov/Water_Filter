@@ -28,14 +28,13 @@ class WaterFilterRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateCandle(candle: Candle) {
-        val updatedCandle = candle.copy(lastChangedTimestamp = System.currentTimeMillis())
-        dao.updateCandle(updatedCandle)
+        dao.updateCandle(candle)
         
         val log = MaintenanceLog(
             filterId = candle.filterId,
             candleNumber = candle.candleNumber.value,
             candleName = candle.name,
-            changeDateTimestamp = updatedCandle.lastChangedTimestamp
+            changeDateTimestamp = candle.lastChangedTimestamp
         )
         dao.insertMaintenanceLog(log)
     }

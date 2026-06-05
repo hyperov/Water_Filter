@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,62 +23,110 @@ import com.nabil.ahmed.waterfilter.data.entity.Candle
 import com.nabil.ahmed.waterfilter.data.util.CandleNumber
 import com.nabil.ahmed.waterfilter.data.util.Lifespan
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
+import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CandleHealthCard(
     candle: Candle,
-    onMarkAsChanged: () -> Unit
+    onMarkAsChanged: () -> Unit,
+    onEditDate: () -> Unit
 ) {
     val healthInfo = calculateCandleHealth(candle)
-    val healthColor = getHealthColor(healthInfo.healthPercentage.toInt())
+    val healthColor = getHealthColor(healthInfo.healthPercentage.roundToInt())
     
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (healthInfo.healthPercentage <= 20f) 
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) 
+            else MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = if (healthInfo.healthPercentage <= 20f) 
+            androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)) 
+            else null
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(24.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = candle.name,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                     )
-                    Text(
-                        text = if (healthInfo.daysRemaining > 0) {
-                            stringResource(R.string.remaining_days, healthInfo.daysRemaining)
-                        } else {
-                            stringResource(R.string.overdue)
-                        },
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = if (healthInfo.daysRemaining > 0) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
-                            fontWeight = if (healthInfo.daysRemaining > 0) FontWeight.Normal else FontWeight.Bold
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Surface(
+                        color = healthColor.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = healthInfo.statusText,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                color = healthColor,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
-                    )
+                    }
                 }
 
-                FilledTonalIconButton(
-                    onClick = onMarkAsChanged,
-                    modifier = Modifier.size(48.dp),
-                    shape = CircleShape,
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = healthColor.copy(alpha = 0.1f),
-                        contentColor = healthColor
-                    )
-                ) {
-                    Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = stringResource(R.string.mark_as_changed))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                        tooltip = { PlainTooltip { Text(text = stringResource(R.string.edit)) } },
+                        state = rememberTooltipState()
+                    ) {
+                        IconButton(
+                            onClick = onEditDate,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(imageVector = Icons.Rounded.Edit, contentDescription = stringResource(R.string.edit))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                        tooltip = { PlainTooltip { Text(text = stringResource(R.string.mark_as_changed)) } },
+                        state = rememberTooltipState()
+                    ) {
+                        Button(
+                            onClick = onMarkAsChanged,
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = healthColor,
+                                contentColor = Color.White
+                            ),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.CheckCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = stringResource(R.string.mark_as_changed))
+                        }
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
+            Spacer(modifier = Modifier.height(24.dp))
+            
             val animatedProgress by animateFloatAsState(
                 targetValue = healthInfo.healthPercentage / 100f,
+                animationSpec = androidx.compose.animation.core.spring(
+                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                    stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+                ),
                 label = "health_progress"
             )
 
@@ -85,28 +134,31 @@ fun CandleHealthCard(
                 progress = { animatedProgress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(10.dp)
+                    .height(12.dp)
                     .clip(CircleShape),
                 color = healthColor,
                 trackColor = healthColor.copy(alpha = 0.1f)
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${healthInfo.healthPercentage.toInt()}%",
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.Bold,
+                    text = "${healthInfo.healthPercentage.roundToInt()}%",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Black,
                         color = healthColor
                     )
                 )
                 Text(
-                    text = stringResource(R.string.candle) + " " + candle.candleNumber.value,
-                    style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    text = stringResource(R.string.last_maintenance_date) + ": " + formatDate(candle.lastChangedTimestamp),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
                 )
             }
         }
@@ -126,7 +178,8 @@ fun CandleHealthCardPreview() {
                 lifespanDays = Lifespan.MONTHS_3,
                 lastChangedTimestamp = System.currentTimeMillis()
             ),
-            onMarkAsChanged = {}
+            onMarkAsChanged = {},
+            onEditDate = {}
         )
     }
 }

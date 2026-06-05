@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.logging.interceptor)
+    implementation(libs.konfetti.compose)
     implementation(libs.material)
     implementation(libs.moshi.kotlin)
     implementation(libs.okhttp)

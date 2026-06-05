@@ -1,18 +1,63 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.WaterDrop
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -22,7 +67,14 @@ import com.nabil.ahmed.waterfilter.data.entity.Filter
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithCandles
 import com.nabil.ahmed.waterfilter.data.util.FilterType
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
+import kotlinx.coroutines.launch
+import nl.dionsegijn.konfetti.compose.KonfettiView
+import nl.dionsegijn.konfetti.core.Party
+import nl.dionsegijn.konfetti.core.Position
+import nl.dionsegijn.konfetti.core.emitter.Emitter
+import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     viewModel: com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel,
@@ -32,15 +84,100 @@ fun DashboardScreen(
     val selectedFilterId by viewModel.selectedFilterId.collectAsStateWithLifecycle()
 
     var showDeleteConfirmation by remember { mutableStateOf<Filter?>(null) }
+    var editingCandle by remember { mutableStateOf<Candle?>(null) }
+    
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    
+    var parties by remember { mutableStateOf<List<Party>>(emptyList()) }
 
-    DashboardScreenContent(
-        filters = filters,
-        selectedFilterId = selectedFilterId,
-        onFilterSelected = { viewModel.selectFilter(it) },
-        onAddFilter = onAddFilter,
-        onDeleteFilter = { showDeleteConfirmation = it },
-        onMarkAsChanged = { viewModel.updateCandle(it) }
-    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        DashboardScreenContent(
+            filters = filters,
+            selectedFilterId = selectedFilterId,
+            snackbarHostState = snackbarHostState,
+            onFilterSelected = { viewModel.selectFilter(it) },
+            onAddFilter = onAddFilter,
+            onDeleteFilter = { showDeleteConfirmation = it },
+            onMarkAsChanged = { candle ->
+                val oldTimestamp = candle.lastChangedTimestamp
+                viewModel.updateCandle(candle)
+                
+                // Trigger Confetti
+                parties = listOf(
+                    Party(
+                        speed = 0f,
+                        maxSpeed = 30f,
+                        damping = 0.9f,
+                        spread = 360,
+                        colors = listOf(0xFFFCE18A.toInt(), 0xFFFF726D.toInt(), 0xFFF4306D.toInt(), 0xFFB48DEF.toInt()),
+                        position = Position.Relative(0.5, 0.3),
+                        emitter = Emitter(duration = 100, TimeUnit.MILLISECONDS).max(100)
+                    )
+                )
+
+                scope.launch {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "تم تحديث الشمعة بنجاح",
+                        actionLabel = "تراجع",
+                        duration = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.updateCandle(candle, oldTimestamp)
+                    }
+                }
+            },
+            onEditDate = { editingCandle = it }
+        )
+
+        if (parties.isNotEmpty()) {
+            KonfettiView(
+                modifier = Modifier.fillMaxSize(),
+                parties = parties
+            )
+            LaunchedEffect(parties) {
+                kotlinx.coroutines.delay(3000)
+                parties = emptyList()
+            }
+        }
+    }
+
+    editingCandle?.let { candle ->
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = candle.lastChangedTimestamp
+        )
+        
+        DatePickerDialog(
+            onDismissRequest = { editingCandle = null },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            viewModel.updateCandle(candle, it)
+                        }
+                        editingCandle = null
+                    }
+                ) {
+                    Text(text = stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { editingCandle = null }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState,
+                title = { 
+                    Text(
+                        text = stringResource(R.string.edit_maintenance_date),
+                        modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
+                    )
+                }
+            )
+        }
+    }
 
     showDeleteConfirmation?.let { filter ->
         AlertDialog(
@@ -79,10 +216,12 @@ fun DashboardScreen(
 fun DashboardScreenContent(
     filters: List<FilterWithCandles>,
     selectedFilterId: Long?,
+    snackbarHostState: SnackbarHostState,
     onFilterSelected: (Long) -> Unit,
     onAddFilter: () -> Unit,
     onDeleteFilter: (Filter) -> Unit,
-    onMarkAsChanged: (Candle) -> Unit
+    onMarkAsChanged: (Candle) -> Unit,
+    onEditDate: (Candle) -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     
@@ -153,6 +292,7 @@ fun DashboardScreenContent(
                 }
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAddFilter,
@@ -169,26 +309,74 @@ fun DashboardScreenContent(
         ) {
             if (filters.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = stringResource(R.string.no_filters))
-                }
-            } else {
-                // Filter Selector
-                ScrollableTabRow(
-                    selectedTabIndex = selectedFilterIndex,
-                    edgePadding = 24.dp,
-                    containerColor = MaterialTheme.colorScheme.background,
-                    divider = {}
-                ) {
-                    filters.forEachIndexed { index, filterWithCandles ->
-                        Tab(
-                            selected = selectedFilterIndex == index,
-                            onClick = { onFilterSelected(filterWithCandles.filter.id) },
-                            text = {
-                                Text(
-                                    text = filterWithCandles.filter.name,
-                                    style = MaterialTheme.typography.titleSmall
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(120.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Rounded.WaterDrop,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(64.dp),
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = stringResource(R.string.no_filters),
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(R.string.add_filter_desc),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(32.dp))
+                        Button(
+                            onClick = onAddFilter,
+                            shape = RoundedCornerShape(16.dp),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                        ) {
+                            Icon(Icons.Rounded.Add, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = stringResource(R.string.add_filter))
+                        }
+                    }
+                }
+            } else {
+                // Filter Selector (Modern Chips)
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    itemsIndexed(filters) { index, filterWithCandles ->
+                        val isSelected = selectedFilterIndex == index
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { onFilterSelected(filterWithCandles.filter.id) },
+                            label = { 
+                                Text(
+                                    text = filterWithCandles.filter.name,
+                                    style = MaterialTheme.typography.labelLarge
+                                ) 
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = Color.White
+                            ),
+                            border = null
                         )
                     }
                 }
@@ -196,7 +384,8 @@ fun DashboardScreenContent(
                 currentFilter?.let {
                     DashboardContent(
                         filter = it,
-                        onMarkAsChanged = onMarkAsChanged
+                        onMarkAsChanged = onMarkAsChanged,
+                        onEditDate = onEditDate
                     )
                 }
             }
@@ -204,7 +393,7 @@ fun DashboardScreenContent(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, locale = "ar")
 @Composable
 fun DashboardScreenPreview() {
     WaterFilterTheme {
@@ -216,10 +405,12 @@ fun DashboardScreenPreview() {
                 )
             ),
             selectedFilterId = 1L,
+            snackbarHostState = remember { SnackbarHostState() },
             onFilterSelected = {},
             onAddFilter = {},
             onDeleteFilter = {},
-            onMarkAsChanged = {}
+            onMarkAsChanged = {},
+            onEditDate = {}
         )
     }
 }

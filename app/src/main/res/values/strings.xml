@@ -68,7 +68,7 @@
     <string name="mark_as_changed">تم التغيير</string>
     <string name="remaining_days">باقي %1$d يوم</string>
     <string name="remaining_months">باقي %1$d شهر</string>
-    <string name="overdue">انتهى موعد التغيير!</string>
+    <string name="overdue">موعد تغيير الشمعة فات!</string>
     <string name="add_filter">إضافة فلتر</string>
     <string name="ok">موافق</string>
     <string name="candle_pp_desc">شمعة الشوائب: لإزالة الرمل والصدأ والعوالق.</string>
@@ -78,6 +78,11 @@
     <string name="candle_post_carbon_desc">كربون نهائي: تحسين طعم المياه وإزالة أي روائح.</string>
     <string name="candle_mineral_desc">المعادن: إضافة الأملاح المعدنية الضرورية للجسم.</string>
     <string name="candle_alkaline_desc">الألكالين: ضبط درجة القلوية وتحسين جودة المياه.</string>
+    <string name="edit">تعديل</string>
+    <string name="save">حفظ</string>
+    <string name="edit_maintenance_date">تعديل تاريخ الصيانة</string>
+    <string name="select_date">اختر التاريخ</string>
+    <string name="last_maintenance_date">تاريخ آخر صيانة</string>
     <string name="back">رجوع</string>
     <string name="selected_date">التاريخ المختار</string>
     <string name="estimated_date_note">لقد اخترنا هذا التاريخ بناءً على منتصف العمر الافتراضي للشمعة لضمان دقة التنبيهات القادمة.</string>

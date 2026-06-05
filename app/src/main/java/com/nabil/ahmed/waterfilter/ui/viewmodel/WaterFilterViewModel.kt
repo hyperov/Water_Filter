@@ -39,9 +39,10 @@ class WaterFilterViewModel @Inject constructor(
         _selectedFilterId.value = id
     }
 
-    fun updateCandle(candle: Candle) {
+    fun updateCandle(candle: Candle, customTimestamp: Long? = null) {
         viewModelScope.launch {
-            repository.updateCandle(candle)
+            val updatedCandle = candle.copy(lastChangedTimestamp = customTimestamp ?: System.currentTimeMillis())
+            repository.updateCandle(updatedCandle)
         }
     }
 
