@@ -62,7 +62,7 @@
     <string name="delete_log_confirm">هل أنت متأكد من حذف هذا السجل؟</string>
     <string name="cancel">إلغاء</string>
     <string name="delete">حذف</string>
-    <string name="mark_as_changed">تم التغيير</string>
+    <string name="mark_as_changed">تم التغيير اليوم</string>
     <string name="remaining_days">باقي %1$d يوم</string>
     <string name="remaining_months">باقي %1$d شهر</string>
     <string name="overdue">موعد تغيير الشمعة فات!</string>

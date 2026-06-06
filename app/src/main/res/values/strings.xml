@@ -65,7 +65,7 @@
     <string name="delete_filter">حذف الفلتر</string>
     <string name="delete_filter_confirm_title">حذف الفلتر؟</string>
     <string name="delete_filter_confirm_message">هل أنت متأكد من رغبتك في حذف فلتر \"%1$s\"؟ سيتم حذف جميع بياناته وسجل الصيانة الخاص به نهائياً.</string>
-    <string name="mark_as_changed">تم التغيير</string>
+    <string name="mark_as_changed">تم التغيير اليوم</string>
     <string name="remaining_days">باقي %1$d يوم</string>
     <string name="remaining_months">باقي %1$d شهر</string>
     <string name="overdue">موعد تغيير الشمعة فات!</string>

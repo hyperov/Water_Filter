@@ -336,11 +336,9 @@ fun DashboardScreenContent(
             } else {
                 // Filter Selector (Modern Chips)
                 LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     contentPadding = PaddingValues(horizontal = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+//                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     itemsIndexed(filters) { index, filterWithCandles ->
                         val isSelected = selectedFilterIndex == index
