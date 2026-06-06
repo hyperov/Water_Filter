@@ -338,7 +338,7 @@ fun DashboardScreenContent(
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                     contentPadding = PaddingValues(horizontal = 24.dp),
-//                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     itemsIndexed(filters) { index, filterWithCandles ->
                         val isSelected = selectedFilterIndex == index
@@ -353,6 +353,7 @@ fun DashboardScreenContent(
                             },
                             shape = RoundedCornerShape(12.dp),
                             colors = FilterChipDefaults.filterChipColors(
+                                containerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                                 selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = Color.White
                             ),
@@ -381,6 +382,10 @@ fun DashboardScreenPreview() {
             filters = listOf(
                 FilterWithCandles(
                     filter = Filter(1L, "Home", FilterType.CANDLES_3),
+                    candles = emptyList()
+                ),
+                FilterWithCandles(
+                    filter = Filter(2L, "Office", FilterType.CANDLES_3),
                     candles = emptyList()
                 )
             ),
