@@ -53,7 +53,17 @@ fun AppNavigation(
             )
         },
         historyContent = {
-            HistoryScreen(viewModel = viewModel)
+            HistoryScreen(
+                viewModel = viewModel,
+                onNavigateToDashboard = {
+                    while (backStack.size > 1) {
+                        backStack.removeLastOrNull()
+                    }
+                    if (backStack.last() !is Route.Dashboard) {
+                        backStack.add(Route.Dashboard)
+                    }
+                }
+            )
         }
     )
 }

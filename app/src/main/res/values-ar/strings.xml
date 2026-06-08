@@ -80,4 +80,10 @@
     <string name="estimated_date_note">لقد اخترنا هذا التاريخ بناءً على منتصف العمر الافتراضي للشمعة لضمان دقة التنبيهات القادمة.</string>
     <string name="last_maintenance_question">متى كانت آخر مرة قمت فيها بتغيير هذه الشمعة؟</string>
     <string name="set_all_today">تعيين الكل كأنه تم تغييره اليوم</string>
+    <string name="search_placeholder">ابحث عن شمعة…</string>
+    <string name="no_results">لا توجد نتائج مطابقة لبحثك.</string>
+    <string name="total_maintenance_events">إجمالي عمليات الصيانة</string>
+    <string name="most_active_filter">أكثر فلتر نشاطاً</string>
+    <string name="no_history_desc">لم يتم تسجيل أي عمليات صيانة بعد. قم بتغيير شمعة من الشاشة الرئيسية لرؤية السجل هنا.</string>
+    <string name="go_to_dashboard">الذهاب للرئيسية</string>
 </resources>
