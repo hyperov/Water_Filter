@@ -157,7 +157,7 @@ fun HistoryScreenContent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = stringResource(R.string.total_maintenance_events),
                                 style = MaterialTheme.typography.labelMedium,
@@ -177,7 +177,7 @@ fun HistoryScreenContent(
                                 color = MaterialTheme.colorScheme.outlineVariant
                             )
                             
-                            Column(horizontalAlignment = Alignment.End) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = stringResource(R.string.most_active_filter),
                                     style = MaterialTheme.typography.labelMedium,
@@ -335,24 +335,30 @@ fun HistoryScreenContent(
                                     state = dismissState,
                                     enableDismissFromStartToEnd = false,
                                     backgroundContent = {
-                                        val color = when (dismissState.dismissDirection) {
-                                            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                                            else -> Color.Transparent
-                                        }
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .padding(vertical = 8.dp)
                                                 .clip(RoundedCornerShape(24.dp))
-                                                .background(color),
+                                                .background(MaterialTheme.colorScheme.error),
                                             contentAlignment = Alignment.CenterEnd
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Rounded.Delete,
-                                                contentDescription = stringResource(R.string.delete),
-                                                modifier = Modifier.padding(end = 16.dp),
-                                                tint = MaterialTheme.colorScheme.surface
-                                            )
+                                            Column() {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.Delete,
+                                                    contentDescription = stringResource(R.string.delete),
+                                                    modifier = Modifier.padding(end = 16.dp),
+                                                    tint = MaterialTheme.colorScheme.surface
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.delete),
+                                                    modifier = Modifier.padding(end = 16.dp),
+                                                    style = MaterialTheme.typography.titleMedium.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.surface
+                                                    )
+                                                )
+                                            }
                                         }
                                     },
                                     modifier = Modifier
