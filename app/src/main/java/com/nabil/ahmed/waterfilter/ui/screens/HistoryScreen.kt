@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithCandles
@@ -114,21 +115,41 @@ fun HistoryScreenContent(
                 FilterChip(
                     selected = selectedFilterId == -1L,
                     onClick = { selectedFilterId = -1L },
-                    label = { Text(stringResource(R.string.all)) },
-                    modifier = Modifier.padding(horizontal = 4.dp),
+                    label = {
+                        Text(
+                            text = stringResource(R.string.all),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            fontSize = 22.sp
+                        )
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .widthIn(min = 80.dp)
+                        .width(100.dp),
                     colors = FilterChipDefaults.filterChipColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         selectedLabelColor = Color.White
+                    ),
+
                     )
-                )
 
                 filters.forEach { filterWithCandles ->
                     FilterChip(
                         selected = selectedFilterId == filterWithCandles.filter.id,
                         onClick = { selectedFilterId = filterWithCandles.filter.id },
-                        label = { Text(filterWithCandles.filter.name) },
-                        modifier = Modifier.padding(horizontal = 4.dp),
+                        label = {
+                            Text(
+                                text = filterWithCandles.filter.name,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                fontSize = 22.sp
+                            )
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .width(100.dp),
                         colors = FilterChipDefaults.filterChipColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                             selectedContainerColor = MaterialTheme.colorScheme.primary,
@@ -169,14 +190,14 @@ fun HistoryScreenContent(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
-                        
+
                         if (mostMaintainedFilterName.isNotEmpty()) {
                             VerticalDivider(
                                 modifier = Modifier.height(40.dp),
                                 thickness = 1.dp,
                                 color = MaterialTheme.colorScheme.outlineVariant
                             )
-                            
+
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = stringResource(R.string.most_active_filter),
@@ -298,7 +319,7 @@ fun HistoryScreenContent(
                                 }
                             }
                         }
-                        
+
                         items(monthLogs, key = { it.id }) { log ->
                             val currentOnDeleteLog by rememberUpdatedState(onDeleteLog)
                             val dismissState = rememberSwipeToDismissBoxState(
@@ -365,7 +386,8 @@ fun HistoryScreenContent(
                                         .weight(1f)
                                         .padding(vertical = 8.dp)
                                 ) {
-                                    val filterIndex = filters.indexOfFirst { it.filter.id == log.filterId }
+                                    val filterIndex =
+                                        filters.indexOfFirst { it.filter.id == log.filterId }
                                     val accentColor = when (filterIndex % 3) {
                                         0 -> MaterialTheme.colorScheme.primary
                                         1 -> MaterialTheme.colorScheme.secondary
@@ -374,7 +396,8 @@ fun HistoryScreenContent(
 
                                     HistoryLogCard(
                                         log = log,
-                                        filterName = filters.find { it.filter.id == log.filterId }?.filter?.name ?: "",
+                                        filterName = filters.find { it.filter.id == log.filterId }?.filter?.name
+                                            ?: "",
                                         accentColor = accentColor
                                     )
                                 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -348,9 +349,12 @@ fun DashboardScreenContent(
                             label = { 
                                 Text(
                                     text = filterWithCandles.filter.name,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.labelLarge
                                 ) 
                             },
+                            modifier = Modifier.widthIn(min = 80.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = FilterChipDefaults.filterChipColors(
                                 containerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
