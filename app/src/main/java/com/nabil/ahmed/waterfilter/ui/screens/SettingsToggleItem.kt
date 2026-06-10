@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -19,14 +20,17 @@ import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 @Composable
 fun SettingsToggleItem(
     title: String,
+    subtitle: String? = null,
     icon: ImageVector? = null,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    isMain: Boolean = false
+    isMain: Boolean = false,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .alpha(if (enabled) 1f else 0.5f)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -52,11 +56,19 @@ fun SettingsToggleItem(
                 text = title,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
 
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
+            enabled = enabled,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
                 checkedTrackColor = MaterialTheme.colorScheme.primary
@@ -69,11 +81,21 @@ fun SettingsToggleItem(
 @Composable
 fun SettingsToggleItemPreview() {
     WaterFilterTheme {
-        SettingsToggleItem(
-            title = "السماح بالتنبيهات",
-            icon = Icons.Rounded.Notifications,
-            checked = true,
-            onCheckedChange = {}
-        )
+        Column {
+            SettingsToggleItem(
+                title = "السماح بالتنبيهات",
+                subtitle = "تفعيل أو تعطيل جميع التنبيهات من التطبيق",
+                icon = Icons.Rounded.Notifications,
+                checked = true,
+                onCheckedChange = {}
+            )
+            SettingsToggleItem(
+                title = "تنبيهات مسبقة",
+                subtitle = "احصل على تنبيه قبل موعد تغيير الشمعة بـ 7 أيام",
+                checked = false,
+                enabled = false,
+                onCheckedChange = {}
+            )
+        }
     }
 }

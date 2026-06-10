@@ -86,4 +86,15 @@
     <string name="most_active_filter">أكثر فلتر نشاطاً</string>
     <string name="no_history_desc">لم يتم تسجيل أي عمليات صيانة بعد. قم بتغيير شمعة من الشاشة الرئيسية لرؤية السجل هنا.</string>
     <string name="go_to_dashboard">الذهاب للرئيسية</string>
+    <string name="enable_all_notifications_desc">تفعيل أو تعطيل جميع التنبيهات من التطبيق</string>
+    <string name="early_warnings_desc">احصل على تنبيه قبل موعد تغيير الشمعة بـ 7 أيام</string>
+    <string name="due_date_reminders_desc">احصل على تنبيه في اليوم المحدد لتغيير الشمعة</string>
+    <string name="sound_desc">تشغيل صوت عند وصول التنبيه</string>
+    <string name="vibration_desc">اهتزاز الجهاز عند وصول التنبيه</string>
+    <string name="quiet_hours_desc">كتم التنبيهات خلال ساعات محددة</string>
+    <string name="notification_permission_title">التنبيهات معطلة</string>
+    <string name="notification_permission_desc">يرجى تفعيل التنبيهات من إعدادات النظام لتتمكن من استلام مواعيد الصيانة.</string>
+    <string name="open_settings">فتح الإعدادات</string>
+    <string name="start_time">وقت البدء</string>
+    <string name="end_time">وقت الانتهاء</string>
 </resources>

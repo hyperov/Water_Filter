@@ -1,40 +1,116 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
-import androidx.compose.foundation.Image
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.nabil.ahmed.waterfilter.R
+import com.nabil.ahmed.waterfilter.data.repository.UserSettings
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
+import com.nabil.ahmed.waterfilter.ui.viewmodel.SettingsViewModel
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
-    var enableAll by remember { mutableStateOf(true) }
-    var earlyWarnings by remember { mutableStateOf(true) }
-    var dueDateReminders by remember { mutableStateOf(true) }
-    var sound by remember { mutableStateOf(true) }
-    var vibration by remember { mutableStateOf(true) }
-    var quietHours by remember { mutableStateOf(false) }
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
+    
+    SettingsContent(
+        settings = settings,
+        onToggleEnableAll = { viewModel.toggleEnableAll(it) },
+        onToggleEarlyWarnings = { viewModel.toggleEarlyWarnings(it) },
+        onToggleDueDateReminders = { viewModel.toggleDueDateReminders(it) },
+        onToggleSound = { viewModel.toggleSound(it) },
+        onToggleVibration = { viewModel.toggleVibration(it) },
+        onToggleQuietHours = { viewModel.toggleQuietHours(it) },
+        onUpdateQuietHoursStart = { viewModel.updateQuietHoursStart(it) },
+        onUpdateQuietHoursEnd = { viewModel.updateQuietHoursEnd(it) }
+    )
+}
 
-    val snackbarHostState = remember { SnackbarHostState() }
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@Composable
+fun SettingsContent(
+    settings: UserSettings,
+    onToggleEnableAll: (Boolean) -> Unit,
+    onToggleEarlyWarnings: (Boolean) -> Unit,
+    onToggleDueDateReminders: (Boolean) -> Unit,
+    onToggleSound: (Boolean) -> Unit,
+    onToggleVibration: (Boolean) -> Unit,
+    onToggleQuietHours: (Boolean) -> Unit,
+    onUpdateQuietHoursStart: (String) -> Unit,
+    onUpdateQuietHoursEnd: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }
+
+    if (showStartTimePicker) {
+        val timeState = rememberTimePickerState(
+            initialHour = settings.quietHoursStart.split(":")[0].toInt(),
+            initialMinute = settings.quietHoursStart.split(":")[1].toInt()
+        )
+        QuietTimePickerDialog(
+            onDismiss = { showStartTimePicker = false },
+            onConfirm = {
+                val formattedTime = String.format(Locale.ENGLISH, "%02d:%02d", timeState.hour, timeState.minute)
+                onUpdateQuietHoursStart(formattedTime)
+                showStartTimePicker = false
+            }
+        ) {
+            TimePicker(state = timeState)
+        }
+    }
+
+    if (showEndTimePicker) {
+        val timeState = rememberTimePickerState(
+            initialHour = settings.quietHoursEnd.split(":")[0].toInt(),
+            initialMinute = settings.quietHoursEnd.split(":")[1].toInt()
+        )
+        QuietTimePickerDialog(
+            onDismiss = { showEndTimePicker = false },
+            onConfirm = {
+                val formattedTime = String.format(Locale.ENGLISH, "%02d:%02d", timeState.hour, timeState.minute)
+                onUpdateQuietHoursEnd(formattedTime)
+                showEndTimePicker = false
+            }
+        ) {
+            TimePicker(state = timeState)
+        }
+    }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -44,44 +120,6 @@ fun SettingsScreen() {
                     )
                 }
             )
-        },
-        bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                tonalElevation = 1.dp
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
-                        .navigationBarsPadding()
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.settings_img),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(80.dp)
-                            .clip(RoundedCornerShape(16.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = {
-                            // Save logic
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(64.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.save_changes),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                    }
-                }
-            }
         }
     ) { innerPadding ->
         Column(
@@ -92,13 +130,29 @@ fun SettingsScreen() {
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            // Permission Check (Android 13+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val permissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+                if (!permissionState.status.isGranted) {
+                    PermissionWarningCard(
+                        onOpenSettings = {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", context.packageName, null)
+                            }
+                            context.startActivity(intent)
+                        }
+                    )
+                }
+            }
+
             // Main Enable Switch
             SettingsCard {
                 SettingsToggleItem(
                     title = stringResource(R.string.enable_all_notifications),
+                    subtitle = stringResource(R.string.enable_all_notifications_desc),
                     icon = Icons.Rounded.Notifications,
-                    checked = enableAll,
-                    onCheckedChange = { enableAll = it },
+                    checked = settings.enableAll,
+                    onCheckedChange = onToggleEnableAll,
                     isMain = true
                 )
             }
@@ -109,14 +163,18 @@ fun SettingsScreen() {
                 Column {
                     SettingsToggleItem(
                         title = stringResource(R.string.early_warnings),
-                        checked = earlyWarnings,
-                        onCheckedChange = { earlyWarnings = it }
+                        subtitle = stringResource(R.string.early_warnings_desc),
+                        checked = settings.earlyWarnings,
+                        enabled = settings.enableAll,
+                        onCheckedChange = onToggleEarlyWarnings
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
                     SettingsToggleItem(
                         title = stringResource(R.string.due_date_reminders),
-                        checked = dueDateReminders,
-                        onCheckedChange = { dueDateReminders = it }
+                        subtitle = stringResource(R.string.due_date_reminders_desc),
+                        checked = settings.dueDateReminders,
+                        enabled = settings.enableAll,
+                        onCheckedChange = onToggleDueDateReminders
                     )
                 }
             }
@@ -127,36 +185,175 @@ fun SettingsScreen() {
                 Column {
                     SettingsToggleItem(
                         title = stringResource(R.string.sound),
-                        icon = Icons.Rounded.VolumeUp,
-                        checked = sound,
-                        onCheckedChange = { sound = it }
+                        subtitle = stringResource(R.string.sound_desc),
+                        icon = Icons.AutoMirrored.Rounded.VolumeUp,
+                        checked = settings.sound,
+                        enabled = settings.enableAll,
+                        onCheckedChange = onToggleSound
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
                     SettingsToggleItem(
                         title = stringResource(R.string.vibration),
+                        subtitle = stringResource(R.string.vibration_desc),
                         icon = Icons.Rounded.Vibration,
-                        checked = vibration,
-                        onCheckedChange = { vibration = it }
+                        checked = settings.vibration,
+                        enabled = settings.enableAll,
+                        onCheckedChange = { 
+                            onToggleVibration(it)
+                            if (it) {
+                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                            }
+                        }
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
-                    SettingsToggleItem(
-                        title = stringResource(R.string.quiet_hours),
-                        icon = Icons.Rounded.DoNotDisturbOn,
-                        checked = quietHours,
-                        onCheckedChange = { quietHours = it }
-                    )
+                    
+                    Column {
+                        SettingsToggleItem(
+                            title = stringResource(R.string.quiet_hours),
+                            subtitle = stringResource(R.string.quiet_hours_desc),
+                            icon = Icons.Rounded.DoNotDisturbOn,
+                            checked = settings.quietHours,
+                            enabled = settings.enableAll,
+                            onCheckedChange = onToggleQuietHours
+                        )
+                        
+                        AnimatedVisibility(
+                            visible = settings.quietHours && settings.enableAll,
+                            enter = expandVertically(),
+                            exit = shrinkVertically()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 64.dp, end = 16.dp, bottom = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                TimeDisplay(
+                                    label = stringResource(R.string.start_time),
+                                    time = settings.quietHoursStart,
+                                    onClick = { showStartTimePicker = true },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                TimeDisplay(
+                                    label = stringResource(R.string.end_time),
+                                    time = settings.quietHoursEnd,
+                                    onClick = { showEndTimePicker = true },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
                 }
             }
             
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
-@Preview(showBackground = true)
+@Composable
+fun QuietTimePickerDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        text = {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                content()
+            }
+        }
+    )
+}
+
+@Composable
+fun PermissionWarningCard(onOpenSettings: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Rounded.Warning,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.notification_permission_title),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+                Text(
+                    text = stringResource(R.string.notification_permission_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+            TextButton(onClick = onOpenSettings) {
+                Text(stringResource(R.string.open_settings))
+            }
+        }
+    }
+}
+
+@Composable
+fun TimeDisplay(label: String, time: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onClick,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier.height(56.dp).fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+            Text(time, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+        }
+    }
+}
+
+@Preview(showBackground = true, locale = "ar")
 @Composable
 fun SettingsPreview() {
     WaterFilterTheme {
-        SettingsScreen()
+        SettingsContent(
+            settings = UserSettings(
+                enableAll = true,
+                earlyWarnings = true,
+                dueDateReminders = true,
+                sound = true,
+                vibration = true,
+                quietHours = true,
+                quietHoursStart = "22:00",
+                quietHoursEnd = "08:00"
+            ),
+            onToggleEnableAll = {},
+            onToggleEarlyWarnings = {},
+            onToggleDueDateReminders = {},
+            onToggleSound = {},
+            onToggleVibration = {},
+            onToggleQuietHours = {},
+            onUpdateQuietHoursStart = {},
+            onUpdateQuietHoursEnd = {}
+        )
     }
 }

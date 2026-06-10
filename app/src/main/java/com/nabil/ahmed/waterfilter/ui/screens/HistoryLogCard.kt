@@ -6,7 +6,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarToday
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,13 +27,15 @@ import java.util.*
 fun HistoryLogCard(
     log: MaintenanceLog,
     filterName: String,
-    accentColor: Color = MaterialTheme.colorScheme.primary
+    accentColor: Color = MaterialTheme.colorScheme.primary,
+    containerColor: Color = MaterialTheme.colorScheme.surface
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.1f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -46,13 +47,19 @@ fun HistoryLogCard(
                         Text(
                             text = filterName,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall.copy(color = accentColor)
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = accentColor,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = log.candleName,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     )
                 }
 
@@ -74,8 +81,8 @@ fun HistoryLogCard(
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 12.dp),
-                thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.outlineVariant
+                thickness = 1.dp,
+                color = accentColor.copy(alpha = 0.5f)
             )
 
             Row(
@@ -85,19 +92,26 @@ fun HistoryLogCard(
             ) {
                 Text(
                     text = stringResource(R.string.changed),
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = accentColor,
+                        fontWeight = FontWeight.Medium
+                    )
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val sdf = remember { SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("ar")) }
                     Text(
-                        text = SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("ar")).format(Date(log.changeDateTimestamp)),
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+                        text = sdf.format(Date(log.changeDateTimestamp)),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = accentColor
+                        )
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(
                         imageVector = Icons.Rounded.CalendarToday,
                         contentDescription = null,
                         modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = accentColor
                     )
                 }
             }
@@ -105,13 +119,15 @@ fun HistoryLogCard(
     }
 }
 
-@Preview
+@Preview(locale = "ar")
 @Composable
 fun HistoryLogCardPreview() {
     WaterFilterTheme {
-        HistoryLogCard(
-            log = MaintenanceLog(1, 1, 1, "PP Filter", System.currentTimeMillis()),
-            filterName = "Home Filter"
-        )
+        Box(modifier = Modifier.padding(16.dp)) {
+            HistoryLogCard(
+                log = MaintenanceLog(1, 1, 1, "PP Filter", System.currentTimeMillis()),
+                filterName = "Home Filter"
+            )
+        }
     }
 }
