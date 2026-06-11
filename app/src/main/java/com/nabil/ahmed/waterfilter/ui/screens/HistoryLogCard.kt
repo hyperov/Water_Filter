@@ -1,18 +1,19 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarToday
-import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,11 +35,14 @@ fun HistoryLogCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.1f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Surface(
                         color = accentColor.copy(alpha = 0.1f),
@@ -63,18 +67,21 @@ fun HistoryLogCard(
                     )
                 }
 
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // Filter Icon on the Right Side
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(accentColor.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.WaterDrop,
+                    Image(
+                        painter = painterResource(id = R.drawable.water_filter),
                         contentDescription = null,
-                        tint = accentColor,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(48.dp),
+                        contentScale = ContentScale.Fit
                     )
                 }
             }
@@ -82,7 +89,7 @@ fun HistoryLogCard(
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 12.dp),
                 thickness = 1.dp,
-                color = accentColor.copy(alpha = 0.5f)
+                color = accentColor.copy(alpha = 0.15f)
             )
 
             Row(
@@ -94,7 +101,7 @@ fun HistoryLogCard(
                     text = stringResource(R.string.changed),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = accentColor,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Bold
                     )
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -106,7 +113,7 @@ fun HistoryLogCard(
                             color = accentColor
                         )
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Icon(
                         imageVector = Icons.Rounded.CalendarToday,
                         contentDescription = null,
