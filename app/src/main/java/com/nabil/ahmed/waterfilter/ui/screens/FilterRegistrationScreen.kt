@@ -151,28 +151,44 @@ fun FilterRegistrationScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                CandleOption(
-                    title = stringResource(R.string.candles_3),
-                    isSelected = selectedType == FilterType.CANDLES_3,
-                    onClick = { selectedType = FilterType.CANDLES_3 },
-                    modifier = Modifier.weight(1f)
-                )
-                CandleOption(
-                    title = stringResource(R.string.candles_5),
-                    isSelected = selectedType == FilterType.CANDLES_5,
-                    onClick = { selectedType = FilterType.CANDLES_5 },
-                    modifier = Modifier.weight(1f)
-                )
-                CandleOption(
-                    title = stringResource(R.string.candles_7),
-                    isSelected = selectedType == FilterType.CANDLES_7,
-                    onClick = { selectedType = FilterType.CANDLES_7 },
-                    modifier = Modifier.weight(1f)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    CandleOption(
+                        title = stringResource(R.string.candles_1),
+                        isSelected = selectedType == FilterType.CANDLES_1,
+                        onClick = { selectedType = FilterType.CANDLES_1 },
+                        modifier = Modifier.weight(1f)
+                    )
+                    CandleOption(
+                        title = stringResource(R.string.candles_3),
+                        isSelected = selectedType == FilterType.CANDLES_3,
+                        onClick = { selectedType = FilterType.CANDLES_3 },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    CandleOption(
+                        title = stringResource(R.string.candles_5),
+                        isSelected = selectedType == FilterType.CANDLES_5,
+                        onClick = { selectedType = FilterType.CANDLES_5 },
+                        modifier = Modifier.weight(1f)
+                    )
+                    CandleOption(
+                        title = stringResource(R.string.candles_7),
+                        isSelected = selectedType == FilterType.CANDLES_7,
+                        onClick = { selectedType = FilterType.CANDLES_7 },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))

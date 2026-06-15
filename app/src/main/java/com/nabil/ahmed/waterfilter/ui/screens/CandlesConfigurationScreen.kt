@@ -35,8 +35,10 @@ fun CandlesConfigurationScreen(
     val candles = remember {
         mutableStateListOf<CandleConfigState>().apply {
             add(CandleConfigState(CandleNumber.CANDLE_1, R.string.candle_pp, R.string.candle_pp_desc, Lifespan.MONTHS_3))
-            add(CandleConfigState(CandleNumber.CANDLE_2, R.string.candle_gac, R.string.candle_gac_desc, Lifespan.MONTHS_6))
-            add(CandleConfigState(CandleNumber.CANDLE_3, R.string.candle_cto, R.string.candle_cto_desc, Lifespan.MONTHS_6))
+            if (filterType.candlesCount >= 3) {
+                add(CandleConfigState(CandleNumber.CANDLE_2, R.string.candle_gac, R.string.candle_gac_desc, Lifespan.MONTHS_6))
+                add(CandleConfigState(CandleNumber.CANDLE_3, R.string.candle_cto, R.string.candle_cto_desc, Lifespan.MONTHS_6))
+            }
             if (filterType.candlesCount >= 5) {
                 add(CandleConfigState(CandleNumber.CANDLE_4, R.string.candle_ro, R.string.candle_ro_desc, Lifespan.MONTHS_24))
                 add(CandleConfigState(CandleNumber.CANDLE_5, R.string.candle_post_carbon, R.string.candle_post_carbon_desc, Lifespan.MONTHS_12))

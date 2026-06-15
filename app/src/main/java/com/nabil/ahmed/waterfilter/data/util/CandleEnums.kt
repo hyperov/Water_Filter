@@ -28,6 +28,7 @@ enum class Lifespan(val days: Int, val resId: Int) {
 }
 
 enum class FilterType(val candlesCount: Int, val resId: Int) {
+    CANDLES_1(1, R.string.candles_1),
     CANDLES_3(3, R.string.candles_3),
     CANDLES_5(5, R.string.candles_5),
     CANDLES_7(7, R.string.candles_7);

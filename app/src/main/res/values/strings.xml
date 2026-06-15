@@ -25,6 +25,7 @@
     <string name="filter_name">اسم الفلتر</string>
     <string name="filter_name_hint">مثال: البيت، بيت ماما</string>
     <string name="filter_type">نوع الفلتر</string>
+    <string name="candles_1">شمعة واحدة</string>
     <string name="candles_3">3 شمعات</string>
     <string name="candles_5">5 شمعات</string>
     <string name="candles_7">7 شمعات</string>

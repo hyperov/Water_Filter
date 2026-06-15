@@ -1,5 +1,6 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -126,7 +127,9 @@ fun HistoryLogCard(
     }
 }
 
-@Preview(locale = "ar")
+@Preview(locale = "ar", device = "spec:width=1080px,height=2340px,dpi=440",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
 @Composable
 fun HistoryLogCardPreview() {
     WaterFilterTheme {
