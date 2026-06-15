@@ -179,6 +179,6 @@ fun CandlesConfigurationScreen(
 @Composable
 fun CandlesConfigurationPreview() {
     WaterFilterTheme {
-        CandlesConfigurationScreen(filterName = "Home", filterType = FilterType.CANDLES_7, onSave = {}, onBack = {})
+        CandlesConfigurationScreen(filterName = "Home", filterType = FilterType.CANDLES_1, onSave = {}, onBack = {})
     }
 }

@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
@@ -85,13 +87,34 @@ fun FilterRegistrationScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            Button(
+                onClick = { if (filterName.isNotBlank()) onNext(filterName, selectedType) },
+                enabled = filterName.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .height(64.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.next),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(imageVector = Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null)
+                }
+            }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(24.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -121,7 +144,7 @@ fun FilterRegistrationScreen(
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
                 value = filterName,
@@ -160,10 +183,10 @@ fun FilterRegistrationScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     CandleOption(
+                        modifier = Modifier.weight(1f),
                         title = stringResource(R.string.candles_1),
                         isSelected = selectedType == FilterType.CANDLES_1,
                         onClick = { selectedType = FilterType.CANDLES_1 },
-                        modifier = Modifier.weight(1f)
                     )
                     CandleOption(
                         title = stringResource(R.string.candles_3),
@@ -192,24 +215,6 @@ fun FilterRegistrationScreen(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                onClick = { if (filterName.isNotBlank()) onNext(filterName, selectedType) },
-                enabled = filterName.isNotBlank(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(R.string.next),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(imageVector = Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null)
-                }
-            }
         }
     }
 }
