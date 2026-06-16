@@ -54,6 +54,7 @@ fun DashboardScreen(
 ) {
     val filters by viewModel.allFiltersWithCandles.collectAsStateWithLifecycle()
     val selectedFilterId by viewModel.selectedFilterId.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     var showDeleteConfirmation by remember { mutableStateOf<Filter?>(null) }
     var editingCandle by remember { mutableStateOf<Candle?>(null) }
@@ -67,6 +68,7 @@ fun DashboardScreen(
         DashboardScreenContent(
             filters = filters,
             selectedFilterId = selectedFilterId,
+            isLoading = isLoading,
             snackbarHostState = snackbarHostState,
             onFilterSelected = { viewModel.selectFilter(it) },
             onAddFilter = onAddFilter,
@@ -199,6 +201,7 @@ fun DashboardScreen(
 fun DashboardScreenContent(
     filters: List<FilterWithCandles>,
     selectedFilterId: Long?,
+    isLoading: Boolean,
     snackbarHostState: SnackbarHostState,
     onFilterSelected: (Long) -> Unit,
     onAddFilter: () -> Unit,
@@ -290,7 +293,11 @@ fun DashboardScreenContent(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            if (filters.isEmpty()) {
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (filters.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -394,6 +401,7 @@ fun DashboardScreenPreview() {
                 )
             ),
             selectedFilterId = 1L,
+            isLoading = false,
             snackbarHostState = remember { SnackbarHostState() },
             onFilterSelected = {},
             onAddFilter = {},

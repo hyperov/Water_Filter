@@ -344,7 +344,9 @@ fun SettingsPreview() {
                 vibration = true,
                 quietHours = true,
                 quietHoursStart = "22:00",
-                quietHoursEnd = "08:00"
+                quietHoursEnd = "08:00",
+                onboardingCompleted = true,
+                isLoaded = true
             ),
             onToggleEnableAll = {},
             onToggleEarlyWarnings = {},

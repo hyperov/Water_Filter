@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,7 +21,15 @@ class WaterFilterViewModel @Inject constructor(
     private val repository: WaterFilterRepository
 ) : ViewModel() {
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     val allFiltersWithCandles: StateFlow<List<FilterWithCandles>> = repository.getAllFiltersWithCandles()
+        .onStart { _isLoading.value = true }
+        .map { 
+            _isLoading.value = false
+            it 
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val allMaintenanceLogs: StateFlow<List<MaintenanceLog>> = repository.getAllMaintenanceLogs()

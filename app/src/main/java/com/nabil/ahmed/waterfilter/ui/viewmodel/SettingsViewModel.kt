@@ -21,6 +21,7 @@ class SettingsViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = UserSettings(
+                onboardingCompleted = false,
                 enableAll = true,
                 earlyWarnings = true,
                 dueDateReminders = true,
@@ -28,12 +29,17 @@ class SettingsViewModel @Inject constructor(
                 vibration = true,
                 quietHours = false,
                 quietHoursStart = "22:00",
-                quietHoursEnd = "08:00"
+                quietHoursEnd = "08:00",
+                isLoaded = false
             )
         )
 
     fun toggleEnableAll(enabled: Boolean) = viewModelScope.launch {
         repository.updateEnableAll(enabled)
+    }
+
+    fun setOnboardingCompleted(completed: Boolean) = viewModelScope.launch {
+        repository.updateOnboardingCompleted(completed)
     }
 
     fun toggleEarlyWarnings(enabled: Boolean) = viewModelScope.launch {

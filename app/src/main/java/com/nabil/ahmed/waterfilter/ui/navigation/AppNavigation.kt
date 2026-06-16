@@ -8,11 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -31,6 +27,7 @@ import com.nabil.ahmed.waterfilter.ui.screens.HistoryScreen
 import com.nabil.ahmed.waterfilter.ui.screens.OnboardingScreen
 import com.nabil.ahmed.waterfilter.ui.screens.SettingsScreen
 import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
+import com.nabil.ahmed.waterfilter.ui.viewmodel.SettingsViewModel
 import androidx.compose.ui.tooling.preview.Preview
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import com.nabil.ahmed.waterfilter.data.util.FilterType
@@ -40,47 +37,14 @@ fun AppNavigation(
     backStack: NavBackStack<Route>
 ) {
     val viewModel: WaterFilterViewModel = hiltViewModel()
-    
-    AppNavigationContent(
-        backStack = backStack,
-        onSaveFilter = { name, type, candles ->
-            viewModel.saveFilter(name, type, candles)
-        },
-        dashboardContent = {
-            DashboardScreen(
-                viewModel = viewModel,
-                onAddFilter = { backStack.add(Route.FilterRegistration) }
-            )
-        },
-        historyContent = {
-            HistoryScreen(
-                viewModel = viewModel,
-                onNavigateToDashboard = {
-                    while (backStack.size > 1) {
-                        backStack.removeLastOrNull()
-                    }
-                    if (backStack.last() !is Route.Dashboard) {
-                        backStack.add(Route.Dashboard)
-                    }
-                }
-            )
-        }
-    )
-}
-
-@Composable
-fun AppNavigationContent(
-    backStack: NavBackStack<Route>,
-    onSaveFilter: (String, FilterType, List<Candle>) -> Unit,
-    dashboardContent: @Composable () -> Unit,
-    historyContent: @Composable () -> Unit
-) {
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
     val context = LocalContext.current
 
-    val myEntryProvider = remember {
+    val myEntryProvider = remember(backStack) {
         entryProvider {
             entry<Route.Onboarding> {
                 OnboardingScreen(onStartClick = {
+                    settingsViewModel.setOnboardingCompleted(true)
                     backStack.add(Route.FilterRegistration)
                 })
             }
@@ -107,10 +71,14 @@ fun AppNavigationContent(
                                 lastChangedTimestamp = config.lastChangedTimestamp ?: System.currentTimeMillis()
                             )
                         }
-                        onSaveFilter(route.filterName, route.filterType, candles)
+                        viewModel.saveFilter(route.filterName, route.filterType, candles)
                         
-                        // Clear the registration flow from backstack and go to Dashboard
-                        while(backStack.isNotEmpty() && (backStack.last() is Route.FilterRegistration || backStack.last() is Route.CandleConfiguration)) {
+                        // Clear the registration flow and onboarding from backstack and go to Dashboard
+                        while(backStack.isNotEmpty() && (
+                            backStack.last() is Route.FilterRegistration || 
+                            backStack.last() is Route.CandleConfiguration ||
+                            backStack.last() is Route.Onboarding
+                        )) {
                             backStack.removeLastOrNull()
                         }
                         backStack.add(Route.Dashboard)
@@ -118,10 +86,23 @@ fun AppNavigationContent(
                 )
             }
             entry<Route.Dashboard> {
-                dashboardContent()
+                DashboardScreen(
+                    viewModel = viewModel,
+                    onAddFilter = { backStack.add(Route.FilterRegistration) }
+                )
             }
             entry<Route.MaintenanceHistory> {
-                historyContent()
+                HistoryScreen(
+                    viewModel = viewModel,
+                    onNavigateToDashboard = {
+                        while (backStack.size > 1) {
+                            backStack.removeLastOrNull()
+                        }
+                        if (backStack.last() !is Route.Dashboard) {
+                            backStack.add(Route.Dashboard)
+                        }
+                    }
+                )
             }
             entry<Route.Settings> {
                 SettingsScreen()
@@ -195,11 +176,7 @@ fun AppNavigationContent(
 @Composable
 fun AppNavigationPreview() {
     WaterFilterTheme {
-        AppNavigationContent(
-            backStack = NavBackStack(Route.Dashboard),
-            onSaveFilter = { _, _, _ -> },
-            dashboardContent = { Box(Modifier.fillMaxSize()) { Text("Dashboard Placeholder") } },
-            historyContent = { Box(Modifier.fillMaxSize()) { Text("History Placeholder") } }
-        )
+        // For preview purposes, we use a simple mock backstack
+        AppNavigation(backStack = NavBackStack(Route.Dashboard))
     }
 }

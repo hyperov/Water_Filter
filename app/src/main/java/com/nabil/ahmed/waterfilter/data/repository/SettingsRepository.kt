@@ -17,6 +17,7 @@ class SettingsRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private object PreferencesKeys {
+        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val ENABLE_ALL = booleanPreferencesKey("enable_all")
         val EARLY_WARNINGS = booleanPreferencesKey("early_warnings")
         val DUE_DATE_REMINDERS = booleanPreferencesKey("due_date_reminders")
@@ -30,6 +31,7 @@ class SettingsRepository @Inject constructor(
     val settingsFlow: Flow<UserSettings> = context.dataStore.data
         .map { preferences ->
             UserSettings(
+                onboardingCompleted = preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false,
                 enableAll = preferences[PreferencesKeys.ENABLE_ALL] ?: true,
                 earlyWarnings = preferences[PreferencesKeys.EARLY_WARNINGS] ?: true,
                 dueDateReminders = preferences[PreferencesKeys.DUE_DATE_REMINDERS] ?: true,
@@ -37,12 +39,17 @@ class SettingsRepository @Inject constructor(
                 vibration = preferences[PreferencesKeys.VIBRATION] ?: true,
                 quietHours = preferences[PreferencesKeys.QUIET_HOURS] ?: false,
                 quietHoursStart = preferences[PreferencesKeys.QUIET_HOURS_START] ?: "22:00",
-                quietHoursEnd = preferences[PreferencesKeys.QUIET_HOURS_END] ?: "08:00"
+                quietHoursEnd = preferences[PreferencesKeys.QUIET_HOURS_END] ?: "08:00",
+                isLoaded = true
             )
         }
 
     suspend fun updateEnableAll(enabled: Boolean) {
         context.dataStore.edit { it[PreferencesKeys.ENABLE_ALL] = enabled }
+    }
+
+    suspend fun updateOnboardingCompleted(completed: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.ONBOARDING_COMPLETED] = completed }
     }
 
     suspend fun updateEarlyWarnings(enabled: Boolean) {
@@ -75,6 +82,7 @@ class SettingsRepository @Inject constructor(
 }
 
 data class UserSettings(
+    val onboardingCompleted: Boolean,
     val enableAll: Boolean,
     val earlyWarnings: Boolean,
     val dueDateReminders: Boolean,
@@ -82,5 +90,6 @@ data class UserSettings(
     val vibration: Boolean,
     val quietHours: Boolean,
     val quietHoursStart: String,
-    val quietHoursEnd: String
+    val quietHoursEnd: String,
+    val isLoaded: Boolean = false
 )
