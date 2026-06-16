@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entryProvider
@@ -24,27 +25,25 @@ import com.nabil.ahmed.waterfilter.ui.screens.CandlesConfigurationScreen
 import com.nabil.ahmed.waterfilter.ui.screens.DashboardScreen
 import com.nabil.ahmed.waterfilter.ui.screens.FilterRegistrationScreen
 import com.nabil.ahmed.waterfilter.ui.screens.HistoryScreen
+import com.nabil.ahmed.waterfilter.ui.screens.NotificationsScreen
 import com.nabil.ahmed.waterfilter.ui.screens.OnboardingScreen
-import com.nabil.ahmed.waterfilter.ui.screens.SettingsScreen
-import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
-import com.nabil.ahmed.waterfilter.ui.viewmodel.SettingsViewModel
-import androidx.compose.ui.tooling.preview.Preview
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
-import com.nabil.ahmed.waterfilter.data.util.FilterType
+import com.nabil.ahmed.waterfilter.ui.viewmodel.NotificationsViewModel
+import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
 
 @Composable
 fun AppNavigation(
     backStack: NavBackStack<Route>
 ) {
     val viewModel: WaterFilterViewModel = hiltViewModel()
-    val settingsViewModel: SettingsViewModel = hiltViewModel()
+    val notificationsViewModel: NotificationsViewModel = hiltViewModel()
     val context = LocalContext.current
 
     val myEntryProvider = remember(backStack) {
         entryProvider {
             entry<Route.Onboarding> {
                 OnboardingScreen(onStartClick = {
-                    settingsViewModel.setOnboardingCompleted(true)
+                    notificationsViewModel.setOnboardingCompleted(true)
                     backStack.add(Route.FilterRegistration)
                 })
             }
@@ -104,8 +103,8 @@ fun AppNavigation(
                     }
                 )
             }
-            entry<Route.Settings> {
-                SettingsScreen()
+            entry<Route.Notifications> {
+                NotificationsScreen()
             }
         }
     }
@@ -113,7 +112,7 @@ fun AppNavigation(
     val currentRoute = backStack.last()
     val showBottomBar = currentRoute is Route.Dashboard || 
                        currentRoute is Route.MaintenanceHistory || 
-                       currentRoute is Route.Settings
+                       currentRoute is Route.Notifications
 
     Scaffold(
         bottomBar = {
@@ -145,10 +144,10 @@ fun AppNavigation(
                         label = { Text(stringResource(R.string.history)) }
                     )
                     NavigationBarItem(
-                        selected = currentRoute is Route.Settings,
+                        selected = currentRoute is Route.Notifications,
                         onClick = {
-                            if (currentRoute !is Route.Settings) {
-                                backStack.add(Route.Settings)
+                            if (currentRoute !is Route.Notifications) {
+                                backStack.add(Route.Notifications)
                             }
                         },
                         icon = { Icon(Icons.Rounded.Settings, contentDescription = null) },

@@ -22,5 +22,5 @@ sealed class Route : NavKey {
     data object MaintenanceHistory : Route()
 
     @Serializable
-    data object Settings : Route()
+    data object Notifications : Route()
 }

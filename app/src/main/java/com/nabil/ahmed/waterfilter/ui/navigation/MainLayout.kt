@@ -23,7 +23,7 @@ fun MainLayout(
     val currentRoute = backStack.last()
     val showBottomBar = currentRoute is Route.Dashboard || 
                        currentRoute is Route.MaintenanceHistory || 
-                       currentRoute is Route.Settings
+                       currentRoute is Route.Notifications
 
     Scaffold(
         bottomBar = {
@@ -58,10 +58,10 @@ fun MainLayout(
                         label = { Text(stringResource(R.string.history)) }
                     )
                     NavigationBarItem(
-                        selected = currentRoute is Route.Settings,
+                        selected = currentRoute is Route.Notifications,
                         onClick = {
-                            if (currentRoute !is Route.Settings) {
-                                backStack.add(Route.Settings)
+                            if (currentRoute !is Route.Notifications) {
+                                backStack.add(Route.Notifications)
                             }
                         },
                         icon = { Icon(Icons.Rounded.Settings, contentDescription = null) },
