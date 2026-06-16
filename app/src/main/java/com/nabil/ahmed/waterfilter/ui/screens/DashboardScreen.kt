@@ -1,5 +1,10 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,12 +32,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.Candle
 import com.nabil.ahmed.waterfilter.data.entity.Filter
@@ -196,7 +206,7 @@ fun DashboardScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun DashboardScreenContent(
     filters: List<FilterWithCandles>,
@@ -210,6 +220,17 @@ fun DashboardScreenContent(
     onEditDate: (Candle) -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // Permission Check (Android 13+)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val permissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+        LaunchedEffect(Unit) {
+            if (!permissionState.status.isGranted) {
+                permissionState.launchPermissionRequest()
+            }
+        }
+    }
     
     val selectedFilterIndex = remember(filters, selectedFilterId) {
         if (selectedFilterId != null) {
@@ -293,6 +314,30 @@ fun DashboardScreenContent(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            // Permission Warning (Android 13+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val permissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+                if (!permissionState.status.isGranted) {
+                    PermissionWarningCard(
+                        onAction = {
+                            if (permissionState.status.shouldShowRationale) {
+                                permissionState.launchPermissionRequest()
+                            } else {
+                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.fromParts("package", context.packageName, null)
+                                }
+                                context.startActivity(intent)
+                            }
+                        },
+                        buttonText = stringResource(
+                            if (permissionState.status.shouldShowRationale) R.string.ok 
+                            else R.string.open_settings
+                        ),
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                    )
+                }
+            }
+
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()

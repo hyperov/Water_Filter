@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.repository.UserSettings
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
@@ -135,24 +136,42 @@ fun SettingsContent(
                 val permissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
                 if (!permissionState.status.isGranted) {
                     PermissionWarningCard(
-                        onOpenSettings = {
-                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.fromParts("package", context.packageName, null)
+                        onAction = {
+                            if (permissionState.status.shouldShowRationale) {
+                                permissionState.launchPermissionRequest()
+                            } else {
+                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.fromParts("package", context.packageName, null)
+                                }
+                                context.startActivity(intent)
                             }
-                            context.startActivity(intent)
-                        }
+                        },
+                        buttonText = stringResource(
+                            if (permissionState.status.shouldShowRationale) R.string.ok 
+                            else R.string.open_settings
+                        )
                     )
                 }
             }
 
             // Main Enable Switch
             SettingsCard {
+                val permissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+                } else null
+
                 SettingsToggleItem(
                     title = stringResource(R.string.enable_all_notifications),
                     subtitle = stringResource(R.string.enable_all_notifications_desc),
                     icon = Icons.Rounded.Notifications,
                     checked = settings.enableAll,
-                    onCheckedChange = onToggleEnableAll,
+                    onCheckedChange = { checked ->
+                        if (checked && permissionState != null && !permissionState.status.isGranted) {
+                            permissionState.launchPermissionRequest()
+                        } else {
+                            onToggleEnableAll(checked)
+                        }
+                    },
                     isMain = true
                 )
             }
@@ -275,42 +294,6 @@ fun QuietTimePickerDialog(
             }
         }
     )
-}
-
-@Composable
-fun PermissionWarningCard(onOpenSettings: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Rounded.Warning,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.notification_permission_title),
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
-                Text(
-                    text = stringResource(R.string.notification_permission_desc),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
-            }
-            TextButton(onClick = onOpenSettings) {
-                Text(stringResource(R.string.open_settings))
-            }
-        }
-    }
 }
 
 @Composable
