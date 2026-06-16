@@ -19,6 +19,12 @@
     <string name="early_reminder_notification_body">%1$s - %2$s سيحتاج إلى تغيير خلال 7 أيام.</string>
     <string name="onboarding_title">مياه نظيفة، حياة صحية</string>
     <string name="onboarding_subtitle">تتبع صيانة فلترك بسهولة ووفر فلوسك</string>
+    <string name="onboarding_step_1_title">أضف فلترك الأول</string>
+    <string name="onboarding_step_1_desc">ابدأ بإضافة الفلتر الخاص بك، سواء كان في المنزل أو العمل، لتبدأ رحلة المياه النقية.</string>
+    <string name="onboarding_step_2_title">حدد عدد الشمعات</string>
+    <string name="onboarding_step_2_desc">اختر نوع الفلتر الخاص بك (1-4 شمعات) وسنقوم بضبط مواعيد الصيانة المثالية لك.</string>
+    <string name="onboarding_step_3_title">تنبيهات ذكية</string>
+    <string name="onboarding_step_3_desc">سنقوم بتذكيرك قبل موعد تغيير كل شمعة، لضمان مياه صحية لك ولعائلتك دائماً.</string>
     <string name="start_now">ابدأ الآن</string>
     <string name="add_new_filter">إضافة فلتر جديد</string>
     <string name="add_filter_desc">قم بتسجيل فلتر المياه الخاص بك لمتابعة مواعيد الصيانة الدورية.</string>
