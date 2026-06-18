@@ -56,6 +56,13 @@ class WaterFilterViewModel @Inject constructor(
         }
     }
 
+    fun renameCandle(candle: Candle, newName: String) {
+        viewModelScope.launch {
+            val updatedCandle = candle.copy(name = newName)
+            repository.updateCandle(updatedCandle)
+        }
+    }
+
     fun deleteMaintenanceLog(log: MaintenanceLog) {
         viewModelScope.launch {
             repository.deleteMaintenanceLog(log)

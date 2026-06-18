@@ -2,6 +2,7 @@ package com.nabil.ahmed.waterfilter.ui.screens
 
 import android.Manifest
 import android.content.Intent
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -206,7 +207,18 @@ fun NotificationsContent(
                         icon = Icons.AutoMirrored.Rounded.VolumeUp,
                         checked = settings.sound,
                         enabled = settings.enableAll,
-                        onCheckedChange = onToggleSound
+                        onCheckedChange = {
+                            onToggleSound(it)
+                            if (it) {
+                                try {
+                                    val notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                                    val r = RingtoneManager.getRingtone(context, notification)
+                                    r.play()
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
                     SettingsToggleItem(

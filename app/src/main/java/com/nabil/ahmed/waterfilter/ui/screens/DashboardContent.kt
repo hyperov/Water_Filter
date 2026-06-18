@@ -32,7 +32,8 @@ import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 fun DashboardContent(
     filter: FilterWithCandles,
     onMarkAsChanged: (Candle) -> Unit,
-    onEditDate: (Candle) -> Unit
+    onEditDate: (Candle) -> Unit,
+    onRenameCandle: (Candle) -> Unit
 ) {
     val overallHealth = calculateOverallHealth(filter.candles)
     val progressColor = getHealthColor(overallHealth)
@@ -110,7 +111,8 @@ fun DashboardContent(
             CandleHealthCard(
                 candle = candle,
                 onMarkAsChanged = { onMarkAsChanged(candle) },
-                onEditDate = { onEditDate(candle) }
+                onEditDate = { onEditDate(candle) },
+                onRename = { onRenameCandle(candle) }
             )
         }
     }
@@ -122,14 +124,15 @@ fun DashboardContentPreview() {
     WaterFilterTheme {
         DashboardContent(
             filter = FilterWithCandles(
-                filter = Filter(1L, "Home Filter", FilterType.CANDLES_7),
+                filter = Filter(1L, "Home Filter", FilterType.CANDLES_3),
                 candles = listOf(
                     Candle(1L, 1L, CandleNumber.CANDLE_1, "PP Filter", Lifespan.MONTHS_3, System.currentTimeMillis()),
                     Candle(2L, 1L, CandleNumber.CANDLE_2, "GAC Filter", Lifespan.MONTHS_6, System.currentTimeMillis())
                 )
             ),
             onMarkAsChanged = {},
-            onEditDate = {}
+            onEditDate = {},
+            onRenameCandle = {}
         )
     }
 }

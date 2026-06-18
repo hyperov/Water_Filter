@@ -2,6 +2,7 @@ package com.nabil.ahmed.waterfilter.ui.screens
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,7 +54,8 @@ import kotlin.math.roundToInt
 fun CandleHealthCard(
     candle: Candle,
     onMarkAsChanged: () -> Unit,
-    onEditDate: () -> Unit
+    onEditDate: () -> Unit,
+    onRename: () -> Unit
 ) {
     val healthInfo = calculateCandleHealth(candle)
     val healthColor = getHealthColor(healthInfo.healthPercentage.roundToInt())
@@ -75,10 +77,22 @@ fun CandleHealthCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = candle.name,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { onRename() }
+                    ) {
+                        Text(
+                            text = candle.name,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Rounded.Edit,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     Surface(
                         color = healthColor.copy(alpha = 0.1f),
@@ -203,7 +217,8 @@ fun CandleHealthCardPreview() {
                 lastChangedTimestamp = System.currentTimeMillis()
             ),
             onMarkAsChanged = {},
-            onEditDate = {}
+            onEditDate = {},
+            onRename = {}
         )
     }
 }

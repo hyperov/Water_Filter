@@ -68,6 +68,7 @@ fun DashboardScreen(
 
     var showDeleteConfirmation by remember { mutableStateOf<Filter?>(null) }
     var editingCandle by remember { mutableStateOf<Candle?>(null) }
+    var renamingCandle by remember { mutableStateOf<Candle?>(null) }
     
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -111,7 +112,8 @@ fun DashboardScreen(
                     }
                 }
             },
-            onEditDate = { editingCandle = it }
+            onEditDate = { editingCandle = it },
+            onRenameCandle = { renamingCandle = it }
         )
 
         if (parties.isNotEmpty()) {
@@ -174,6 +176,40 @@ fun DashboardScreen(
         }
     }
 
+    renamingCandle?.let { candle ->
+        var newName by remember { mutableStateOf(candle.name) }
+        AlertDialog(
+            onDismissRequest = { renamingCandle = null },
+            title = { Text(text = "تعديل اسم الشمعة") },
+            text = {
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text("اسم الشمعة") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (newName.isNotBlank()) {
+                            viewModel.renameCandle(candle, newName)
+                            renamingCandle = null
+                        }
+                    }
+                ) {
+                    Text(text = stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { renamingCandle = null }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     showDeleteConfirmation?.let { filter ->
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = null },
@@ -217,7 +253,8 @@ fun DashboardScreenContent(
     onAddFilter: () -> Unit,
     onDeleteFilter: (Filter) -> Unit,
     onMarkAsChanged: (Candle) -> Unit,
-    onEditDate: (Candle) -> Unit
+    onEditDate: (Candle) -> Unit,
+    onRenameCandle: (Candle) -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -422,7 +459,8 @@ fun DashboardScreenContent(
                     DashboardContent(
                         filter = it,
                         onMarkAsChanged = onMarkAsChanged,
-                        onEditDate = onEditDate
+                        onEditDate = onEditDate,
+                        onRenameCandle = onRenameCandle
                     )
                 }
             }
@@ -452,7 +490,8 @@ fun DashboardScreenPreview() {
             onAddFilter = {},
             onDeleteFilter = {},
             onMarkAsChanged = {},
-            onEditDate = {}
+            onEditDate = {},
+            onRenameCandle = {}
         )
     }
 }
