@@ -76,3 +76,22 @@ fun getHealthColor(percentage: Int): Color {
         else -> MaterialTheme.colorScheme.error // Red (Overdue)
     }
 }
+
+/**
+ * Safely gets package info to avoid NameNotFoundException.
+ * This can be used if you need to check app version or other package details.
+ */
+fun getPackageInfoSafe(context: android.content.Context) {
+    try {
+        val packageManager = context.packageManager
+        val packageName = context.packageName
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getPackageInfo(packageName, android.content.pm.PackageManager.PackageInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getPackageInfo(packageName, 0)
+        }
+    } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
+        android.util.Log.e("PackageUtils", "Package not found: ${context.packageName}", e)
+    }
+}
