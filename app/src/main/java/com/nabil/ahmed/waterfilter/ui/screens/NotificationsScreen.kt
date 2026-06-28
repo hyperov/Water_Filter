@@ -2,9 +2,13 @@ package com.nabil.ahmed.waterfilter.ui.screens
 
 import android.Manifest
 import android.content.Intent
+import android.content.Context
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -20,13 +24,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -166,6 +171,9 @@ fun NotificationsContent(
                     icon = Icons.Rounded.Notifications,
                     checked = settings.enableAll,
                     onCheckedChange = { checked ->
+                        haptic.performHapticFeedback(
+                            if (checked) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
+                        )
                         if (checked && permissionState != null && !permissionState.status.isGranted) {
                             permissionState.launchPermissionRequest()
                         } else {
@@ -230,8 +238,25 @@ fun NotificationsContent(
                         enabled = settings.enableAll,
                         onCheckedChange = { 
                             onToggleVibration(it)
+                            haptic.performHapticFeedback(
+                                if (it) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
+                            )
                             if (it) {
-                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                                try {
+                                    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+                                    } else {
+                                        @Suppress("DEPRECATION")
+                                        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                                    }
+
+                                    // Cancel any ongoing vibration to ensure the new one triggers immediately
+                                    vibrator.cancel()
+                                    
+                                    vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
                             }
                         }
                     )
