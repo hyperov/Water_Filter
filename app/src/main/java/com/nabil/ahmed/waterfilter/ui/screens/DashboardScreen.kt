@@ -48,6 +48,7 @@ import com.nabil.ahmed.waterfilter.data.entity.Candle
 import com.nabil.ahmed.waterfilter.data.entity.Filter
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithCandles
 import com.nabil.ahmed.waterfilter.data.util.FilterType
+import com.nabil.ahmed.waterfilter.ui.components.AdBanner
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import kotlinx.coroutines.launch
 import nl.dionsegijn.konfetti.compose.KonfettiView
@@ -456,14 +457,19 @@ fun DashboardScreenContent(
                 }
 
                 currentFilter?.let {
-                    DashboardContent(
-                        filter = it,
-                        onMarkAsChanged = onMarkAsChanged,
-                        onEditDate = onEditDate,
-                        onRenameCandle = onRenameCandle
-                    )
+                    Box(modifier = Modifier.weight(1f)) {
+                        DashboardContent(
+                            filter = it,
+                            onMarkAsChanged = onMarkAsChanged,
+                            onEditDate = onEditDate,
+                            onRenameCandle = onRenameCandle
+                        )
+                    }
                 }
             }
+            
+            // Ad Banner at the bottom
+            AdBanner(modifier = Modifier.padding(vertical = 8.dp))
         }
     }
 }

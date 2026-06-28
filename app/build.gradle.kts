@@ -35,6 +35,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Default Sample Ad Unit ID for debug/local builds
+        buildConfigField("String", "AD_UNIT_ID", "\"ca-app-pub-3940256099942544/6300978111\"")
     }
 
     buildTypes {
@@ -45,6 +48,14 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+
+            // Real Ad Unit ID from local.properties (secure)
+            val releaseAdUnitId = localProperties.getProperty("AD_UNIT_ID") ?: "ca-app-pub-3940256099942544/6300978111"
+            buildConfigField("String", "AD_UNIT_ID", "\"$releaseAdUnitId\"")
+        }
+        debug {
+            // Keep using the sample ID in debug
+            buildConfigField("String", "AD_UNIT_ID", "\"ca-app-pub-3940256099942544/6300978111\"")
         }
     }
     compileOptions {
@@ -97,6 +108,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.logging.interceptor)
     implementation(libs.konfetti.compose)
+    implementation(libs.play.services.ads)
     implementation(libs.material)
     implementation(libs.moshi.kotlin)
     implementation(libs.okhttp)

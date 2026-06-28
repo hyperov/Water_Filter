@@ -3,8 +3,12 @@ package com.nabil.ahmed.waterfilter
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.*
+import com.google.android.gms.ads.MobileAds
 import com.nabil.ahmed.waterfilter.worker.ReminderWorker
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -21,6 +25,12 @@ class WaterFilterApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        
+        // Initialize Mobile Ads SDK
+        CoroutineScope(Dispatchers.IO).launch {
+            MobileAds.initialize(this@WaterFilterApp) {}
+        }
+
         scheduleReminders()
     }
 

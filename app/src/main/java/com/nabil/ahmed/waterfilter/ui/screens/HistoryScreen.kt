@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithCandles
 import com.nabil.ahmed.waterfilter.data.entity.MaintenanceLog
+import com.nabil.ahmed.waterfilter.ui.components.AdBanner
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
 import java.text.SimpleDateFormat
@@ -239,173 +240,178 @@ fun HistoryScreenContent(
                 )
             )
 
-            if (filteredLogs.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(32.dp)
-                    ) {
-                        Surface(
-                            modifier = Modifier.size(120.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+            Box(modifier = Modifier.weight(1f)) {
+                if (filteredLogs.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(32.dp)
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Rounded.History,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(64.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(
-                            text = stringResource(if (searchQuery.isEmpty()) R.string.no_history else R.string.no_results),
-                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                            textAlign = TextAlign.Center
-                        )
-                        if (searchQuery.isEmpty()) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = stringResource(R.string.no_history_desc),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(32.dp))
-                            Button(
-                                onClick = onNavigateToDashboard,
-                                shape = RoundedCornerShape(16.dp),
-                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                            Surface(
+                                modifier = Modifier.size(120.dp),
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
                             ) {
-                                Icon(Icons.Rounded.Home, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = stringResource(R.string.go_to_dashboard))
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.History,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(64.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text(
+                                text = stringResource(if (searchQuery.isEmpty()) R.string.no_history else R.string.no_results),
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                textAlign = TextAlign.Center
+                            )
+                            if (searchQuery.isEmpty()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = stringResource(R.string.no_history_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Center,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(32.dp))
+                                Button(
+                                    onClick = onNavigateToDashboard,
+                                    shape = RoundedCornerShape(16.dp),
+                                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                                ) {
+                                    Icon(Icons.Rounded.Home, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(text = stringResource(R.string.go_to_dashboard))
+                                }
                             }
                         }
                     }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 24.dp)
-                ) {
-                    groupedLogs.forEach { (month, monthLogs) ->
-                        stickyHeader {
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(horizontal = 24.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 24.dp)
+                    ) {
+                        groupedLogs.forEach { (month, monthLogs) ->
+                            stickyHeader {
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
                                 ) {
-                                    Box(
+                                    Row(
                                         modifier = Modifier
-                                            .size(12.dp)
-                                            .clip(CircleShape)
-                                            .background(MaterialTheme.colorScheme.primary)
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Text(
-                                        text = month,
-                                        style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    )
-                                }
-                            }
-                        }
-
-                        items(monthLogs, key = { it.id }) { log ->
-                            val currentOnDeleteLog by rememberUpdatedState(onDeleteLog)
-                            val dismissState = rememberSwipeToDismissBoxState(
-                                confirmValueChange = {
-                                    if (it == SwipeToDismissBoxValue.EndToStart) {
-                                        currentOnDeleteLog(log)
-                                        true
-                                    } else {
-                                        false
-                                    }
-                                }
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .padding(horizontal = 24.dp)
-                                    .height(IntrinsicSize.Min)
-                            ) {
-                                // Static Timeline line
-                                Box(
-                                    modifier = Modifier
-                                        .padding(start = 5.dp)
-                                        .width(2.dp)
-                                        .fillMaxHeight()
-                                        .background(
-                                            color = MaterialTheme.colorScheme.outlineVariant,
-                                            shape = RoundedCornerShape(1.dp)
-                                        )
-                                )
-
-                                Spacer(modifier = Modifier.width(24.dp))
-
-                                SwipeToDismissBox(
-                                    state = dismissState,
-                                    enableDismissFromStartToEnd = false,
-                                    backgroundContent = {
+                                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
                                         Box(
                                             modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(vertical = 8.dp)
-                                                .clip(RoundedCornerShape(24.dp))
-                                                .background(MaterialTheme.colorScheme.error),
-                                            contentAlignment = Alignment.CenterEnd
-                                        ) {
-                                            Column() {
-                                                Icon(
-                                                    imageVector = Icons.Rounded.Delete,
-                                                    contentDescription = stringResource(R.string.delete),
-                                                    modifier = Modifier.padding(end = 16.dp),
-                                                    tint = MaterialTheme.colorScheme.surface
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.delete),
-                                                    modifier = Modifier.padding(end = 16.dp),
-                                                    style = MaterialTheme.typography.titleMedium.copy(
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.surface
-                                                    )
-                                                )
-                                            }
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(vertical = 8.dp)
-                                ) {
-                                    val filterIndex =
-                                        filters.indexOfFirst { it.filter.id == log.filterId }
-                                    val accentColor = when (filterIndex % 3) {
-                                        0 -> MaterialTheme.colorScheme.primary
-                                        1 -> MaterialTheme.colorScheme.secondary
-                                        else -> MaterialTheme.colorScheme.tertiary
+                                                .size(12.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.primary)
+                                        )
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Text(
+                                            text = month,
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        )
                                     }
+                                }
+                            }
 
-                                    HistoryLogCard(
-                                        log = log,
-                                        filterName = filters.find { it.filter.id == log.filterId }?.filter?.name
-                                            ?: "",
-                                        accentColor = accentColor
+                            items(monthLogs, key = { it.id }) { log ->
+                                val currentOnDeleteLog by rememberUpdatedState(onDeleteLog)
+                                val dismissState = rememberSwipeToDismissBoxState(
+                                    confirmValueChange = {
+                                        if (it == SwipeToDismissBoxValue.EndToStart) {
+                                            currentOnDeleteLog(log)
+                                            true
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                )
+
+                                Row(
+                                    modifier = Modifier
+                                        .padding(horizontal = 24.dp)
+                                        .height(IntrinsicSize.Min)
+                                ) {
+                                    // Static Timeline line
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(start = 5.dp)
+                                            .width(2.dp)
+                                            .fillMaxHeight()
+                                            .background(
+                                                color = MaterialTheme.colorScheme.outlineVariant,
+                                                shape = RoundedCornerShape(1.dp)
+                                            )
                                     )
+
+                                    Spacer(modifier = Modifier.width(24.dp))
+
+                                    SwipeToDismissBox(
+                                        state = dismissState,
+                                        enableDismissFromStartToEnd = false,
+                                        backgroundContent = {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(vertical = 8.dp)
+                                                    .clip(RoundedCornerShape(24.dp))
+                                                    .background(MaterialTheme.colorScheme.error),
+                                                contentAlignment = Alignment.CenterEnd
+                                            ) {
+                                                Column() {
+                                                    Icon(
+                                                        imageVector = Icons.Rounded.Delete,
+                                                        contentDescription = stringResource(R.string.delete),
+                                                        modifier = Modifier.padding(end = 16.dp),
+                                                        tint = MaterialTheme.colorScheme.surface
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.delete),
+                                                        modifier = Modifier.padding(end = 16.dp),
+                                                        style = MaterialTheme.typography.titleMedium.copy(
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = MaterialTheme.colorScheme.surface
+                                                        )
+                                                    )
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(vertical = 8.dp)
+                                    ) {
+                                        val filterIndex =
+                                            filters.indexOfFirst { it.filter.id == log.filterId }
+                                        val accentColor = when (filterIndex % 3) {
+                                            0 -> MaterialTheme.colorScheme.primary
+                                            1 -> MaterialTheme.colorScheme.secondary
+                                            else -> MaterialTheme.colorScheme.tertiary
+                                        }
+
+                                        HistoryLogCard(
+                                            log = log,
+                                            filterName = filters.find { it.filter.id == log.filterId }?.filter?.name
+                                                ?: "",
+                                            accentColor = accentColor
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
+            // Ad Banner at the bottom
+            AdBanner(modifier = Modifier.padding(top = 8.dp))
         }
     }
 }
