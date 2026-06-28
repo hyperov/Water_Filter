@@ -89,7 +89,7 @@ class ReminderWorker @AssistedInject constructor(
         return if (startInMinutes <= endInMinutes) {
             currentTimeInMinutes in startInMinutes..endInMinutes
         } else {
-            currentTimeInMinutes >= startInMinutes || currentTimeInMinutes <= endInMinutes
+            currentTimeInMinutes !in (endInMinutes + 1)..<startInMinutes
         }
     }
 
@@ -97,20 +97,18 @@ class ReminderWorker @AssistedInject constructor(
         val channelId = "filter_reminders"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = if (settings.sound) NotificationManager.IMPORTANCE_DEFAULT else NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(
-                channelId,
-                context.getString(R.string.filter_reminders),
-                importance
-            ).apply {
-                if (!settings.vibration) {
-                    enableVibration(false)
-                    vibrationPattern = null
-                }
+        val importance = if (settings.sound) NotificationManager.IMPORTANCE_DEFAULT else NotificationManager.IMPORTANCE_LOW
+        val channel = NotificationChannel(
+            channelId,
+            context.getString(R.string.filter_reminders),
+            importance
+        ).apply {
+            if (!settings.vibration) {
+                enableVibration(false)
+                vibrationPattern = null
             }
-            notificationManager.createNotificationChannel(channel)
         }
+        notificationManager.createNotificationChannel(channel)
 
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
