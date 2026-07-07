@@ -21,13 +21,18 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.Candle
+import com.nabil.ahmed.waterfilter.ui.components.AdBanner
 import com.nabil.ahmed.waterfilter.ui.screens.CandlesConfigurationScreen
 import com.nabil.ahmed.waterfilter.ui.screens.DashboardScreen
 import com.nabil.ahmed.waterfilter.ui.screens.FilterRegistrationScreen
 import com.nabil.ahmed.waterfilter.ui.screens.HistoryScreen
 import com.nabil.ahmed.waterfilter.ui.screens.NotificationsScreen
 import com.nabil.ahmed.waterfilter.ui.screens.OnboardingScreen
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
+import com.nabil.ahmed.waterfilter.data.util.FilterType
 import com.nabil.ahmed.waterfilter.ui.viewmodel.NotificationsViewModel
 import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
 
@@ -35,15 +40,55 @@ import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
 fun AppNavigation(
     backStack: NavBackStack<Route>
 ) {
+    // The stateful version of AppNavigation provides the ViewModels using hiltViewModel()
+    // and passes down the necessary callbacks and screen content to the stateless version.
     val viewModel: WaterFilterViewModel = hiltViewModel()
     val notificationsViewModel: NotificationsViewModel = hiltViewModel()
+
+    AppNavigationContent(
+        backStack = backStack,
+        onSetOnboardingCompleted = { notificationsViewModel.setOnboardingCompleted(it) },
+        onSaveFilter = { name, type, candles -> viewModel.saveFilter(name, type, candles) },
+        dashboardScreen = {
+            DashboardScreen(
+                viewModel = viewModel,
+                onAddFilter = { backStack.add(Route.FilterRegistration) }
+            )
+        },
+        historyScreen = {
+            HistoryScreen(
+                viewModel = viewModel,
+                onNavigateToDashboard = {
+                    while (backStack.size > 1) {
+                        backStack.removeLastOrNull()
+                    }
+                    if (backStack.last() !is Route.Dashboard) {
+                        backStack.add(Route.Dashboard)
+                    }
+                }
+            )
+        }
+    )
+}
+
+/**
+ * A stateless version of AppNavigation that can be previewed without Hilt or ViewModels.
+ */
+@Composable
+fun AppNavigationContent(
+    backStack: NavBackStack<Route>,
+    onSetOnboardingCompleted: (Boolean) -> Unit,
+    onSaveFilter: (String, FilterType, List<Candle>) -> Unit,
+    dashboardScreen: @Composable () -> Unit,
+    historyScreen: @Composable () -> Unit
+) {
     val context = LocalContext.current
 
     val myEntryProvider = remember(backStack) {
         entryProvider {
             entry<Route.Onboarding> {
                 OnboardingScreen(onStartClick = {
-                    notificationsViewModel.setOnboardingCompleted(true)
+                    onSetOnboardingCompleted(true)
                     backStack.add(Route.FilterRegistration)
                 })
             }
@@ -70,7 +115,7 @@ fun AppNavigation(
                                 lastChangedTimestamp = config.lastChangedTimestamp ?: System.currentTimeMillis()
                             )
                         }
-                        viewModel.saveFilter(route.filterName, route.filterType, candles)
+                        onSaveFilter(route.filterName, route.filterType, candles)
                         
                         // Clear the registration flow and onboarding from backstack and go to Dashboard
                         while(backStack.isNotEmpty() && (
@@ -85,23 +130,10 @@ fun AppNavigation(
                 )
             }
             entry<Route.Dashboard> {
-                DashboardScreen(
-                    viewModel = viewModel,
-                    onAddFilter = { backStack.add(Route.FilterRegistration) }
-                )
+                dashboardScreen()
             }
             entry<Route.MaintenanceHistory> {
-                HistoryScreen(
-                    viewModel = viewModel,
-                    onNavigateToDashboard = {
-                        while (backStack.size > 1) {
-                            backStack.removeLastOrNull()
-                        }
-                        if (backStack.last() !is Route.Dashboard) {
-                            backStack.add(Route.Dashboard)
-                        }
-                    }
-                )
+                historyScreen()
             }
             entry<Route.Notifications> {
                 NotificationsScreen()
@@ -116,44 +148,57 @@ fun AppNavigation(
 
     Scaffold(
         bottomBar = {
-            if (showBottomBar) {
-                NavigationBar {
-                    NavigationBarItem(
-                        selected = currentRoute is Route.Dashboard,
-                        onClick = {
-                            if (currentRoute !is Route.Dashboard) {
-                                while (backStack.size > 1) {
-                                    backStack.removeLastOrNull()
+            Column(modifier = Modifier.navigationBarsPadding()) {
+                if (showBottomBar) {
+                    NavigationBar(windowInsets = WindowInsets(0, 0, 0, 0)) {
+                        val navBarItemColors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.outline,
+                            unselectedTextColor = MaterialTheme.colorScheme.outline
+                        )
+                        NavigationBarItem(
+                            colors = navBarItemColors,
+                            selected = currentRoute is Route.Dashboard,
+                            onClick = {
+                                if (currentRoute !is Route.Dashboard) {
+                                    while (backStack.size > 1) {
+                                        backStack.removeLastOrNull()
+                                    }
+                                    if (backStack.last() !is Route.Dashboard) {
+                                        backStack.add(Route.Dashboard)
+                                    }
                                 }
-                                if (backStack.last() !is Route.Dashboard) {
-                                    backStack.add(Route.Dashboard)
+                            },
+                            icon = { Icon(Icons.Rounded.Home, contentDescription = null) },
+                            label = { Text(stringResource(R.string.dashboard)) }
+                        )
+                        NavigationBarItem(
+                            colors = navBarItemColors,
+                            selected = currentRoute is Route.MaintenanceHistory,
+                            onClick = {
+                                if (currentRoute !is Route.MaintenanceHistory) {
+                                    backStack.add(Route.MaintenanceHistory)
                                 }
-                            }
-                        },
-                        icon = { Icon(Icons.Rounded.Home, contentDescription = null) },
-                        label = { Text(stringResource(R.string.dashboard)) }
-                    )
-                    NavigationBarItem(
-                        selected = currentRoute is Route.MaintenanceHistory,
-                        onClick = {
-                            if (currentRoute !is Route.MaintenanceHistory) {
-                                backStack.add(Route.MaintenanceHistory)
-                            }
-                        },
-                        icon = { Icon(Icons.Rounded.History, contentDescription = null) },
-                        label = { Text(stringResource(R.string.history)) }
-                    )
-                    NavigationBarItem(
-                        selected = currentRoute is Route.Notifications,
-                        onClick = {
-                            if (currentRoute !is Route.Notifications) {
-                                backStack.add(Route.Notifications)
-                            }
-                        },
-                        icon = { Icon(Icons.Rounded.Settings, contentDescription = null) },
-                        label = { Text(stringResource(R.string.settings)) }
-                    )
+                            },
+                            icon = { Icon(Icons.Rounded.History, contentDescription = null) },
+                            label = { Text(stringResource(R.string.history)) }
+                        )
+                        NavigationBarItem(
+                            colors = navBarItemColors,
+                            selected = currentRoute is Route.Notifications,
+                            onClick = {
+                                if (currentRoute !is Route.Notifications) {
+                                    backStack.add(Route.Notifications)
+                                }
+                            },
+                            icon = { Icon(Icons.Rounded.Settings, contentDescription = null) },
+                            label = { Text(stringResource(R.string.settings)) }
+                        )
+                    }
                 }
+                AdBanner()
             }
         }
     ) { innerPadding ->
@@ -175,7 +220,23 @@ fun AppNavigation(
 @Composable
 fun AppNavigationPreview() {
     WaterFilterTheme {
-        // For preview purposes, we use a simple mock backstack
-        AppNavigation(backStack = NavBackStack(Route.Dashboard))
+        // For preview purposes, we use the stateless AppNavigationContent
+        // and provide mock implementations for the ViewModels' dependencies.
+        AppNavigationContent(
+            backStack = NavBackStack(Route.Dashboard),
+            onSetOnboardingCompleted = {},
+            onSaveFilter = { _, _, _ -> },
+            dashboardScreen = {
+                // We can use a simple placeholder or the Content version of the screen
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    Text("Dashboard Preview")
+                }
+            },
+            historyScreen = {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    Text("History Preview")
+                }
+            }
+        )
     }
 }

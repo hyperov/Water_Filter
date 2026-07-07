@@ -19,6 +19,8 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.nabil.ahmed.waterfilter.BuildConfig
+import androidx.compose.ui.tooling.preview.Preview
+import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 
 @Composable
 fun AdBanner(
@@ -61,5 +63,13 @@ fun AdBanner(
                 }
             }
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AdBannerPreview() {
+    WaterFilterTheme {
+        AdBanner()
     }
 }

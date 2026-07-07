@@ -29,7 +29,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithCandles
 import com.nabil.ahmed.waterfilter.data.entity.MaintenanceLog
-import com.nabil.ahmed.waterfilter.ui.components.AdBanner
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel
 import java.text.SimpleDateFormat
@@ -409,9 +408,6 @@ fun HistoryScreenContent(
                     }
                 }
             }
-
-            // Ad Banner at the bottom
-            AdBanner(modifier = Modifier.padding(top = 8.dp))
         }
     }
 }

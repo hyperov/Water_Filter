@@ -39,7 +39,6 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.repository.UserSettings
-import com.nabil.ahmed.waterfilter.ui.components.AdBanner
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import com.nabil.ahmed.waterfilter.ui.viewmodel.NotificationsViewModel
 import java.util.Locale
@@ -300,9 +299,6 @@ fun NotificationsContent(
                     }
                 }
             }
-            
-            // Ad Banner
-            AdBanner(modifier = Modifier.padding(top = 16.dp))
         }
     }
 }
