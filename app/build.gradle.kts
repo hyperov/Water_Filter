@@ -31,7 +31,7 @@ android {
         applicationId = "com.nabil.ahmed.waterfilter"
         minSdk = 28
         targetSdk = 37
-        versionCode = 4
+        versionCode = 5
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -52,8 +52,12 @@ android {
             // Real Ad Unit ID from local.properties (secure)
             val releaseAdUnitId = localProperties.getProperty("AD_UNIT_ID") ?: "ca-app-pub-3940256099942544/6300978111"
             buildConfigField("String", "AD_UNIT_ID", "\"$releaseAdUnitId\"")
+            installation {
+                enableBaselineProfile = false
+            }
         }
         debug {
+            applicationIdSuffix = ".debug"
             // Keep using the sample ID in debug
             buildConfigField("String", "AD_UNIT_ID", "\"ca-app-pub-3940256099942544/6300978111\"")
         }

@@ -61,6 +61,9 @@ fun AdBanner(
                     }
                     loadAd(AdRequest.Builder().build())
                 }
+            },
+            onRelease = { adView ->
+                adView.destroy()
             }
         )
     }

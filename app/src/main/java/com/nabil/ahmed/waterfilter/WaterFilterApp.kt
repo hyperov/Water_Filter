@@ -1,14 +1,12 @@
 package com.nabil.ahmed.waterfilter
 
 import android.app.Application
+import android.webkit.WebView
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.*
 import com.google.android.gms.ads.MobileAds
 import com.nabil.ahmed.waterfilter.worker.ReminderWorker
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -25,11 +23,15 @@ class WaterFilterApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Fix for WebView crash in multi-process apps
+        val processName = getProcessName()
+        if (packageName != processName) {
+            WebView.setDataDirectorySuffix(processName)
+        }
         
         // Initialize Mobile Ads SDK
-        CoroutineScope(Dispatchers.IO).launch {
-            MobileAds.initialize(this@WaterFilterApp) {}
-        }
+        MobileAds.initialize(this) {}
 
         scheduleReminders()
     }
@@ -46,7 +48,7 @@ class WaterFilterApp : Application(), Configuration.Provider {
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "filter_reminders",
             ExistingPeriodicWorkPolicy.KEEP,
-            reminderRequest
+            reminderRequest,
         )
     }
 }
