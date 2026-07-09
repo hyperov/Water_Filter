@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1029720606553",
+    "project_id": "water-filter-92469",
+    "storage_bucket": "water-filter-92469.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1029720606553:android:27dabb93f7f8dd6473ae48",
+        "android_client_info": {
+          "package_name": "com.nabil.ahmed.waterfilter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWQfu9idRtbGDS10p4AOUSR3E1psvvxMQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
