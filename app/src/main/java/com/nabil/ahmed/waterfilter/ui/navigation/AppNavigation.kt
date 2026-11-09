@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -150,13 +151,16 @@ fun AppNavigationContent(
         bottomBar = {
             Column(modifier = Modifier.navigationBarsPadding()) {
                 if (showBottomBar) {
-                    NavigationBar(windowInsets = WindowInsets(0, 0, 0, 0)) {
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        windowInsets = WindowInsets(0, 0, 0, 0)
+                    ) {
                         val navBarItemColors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
                             indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                            unselectedIconColor = MaterialTheme.colorScheme.outline,
-                            unselectedTextColor = MaterialTheme.colorScheme.outline
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         NavigationBarItem(
                             colors = navBarItemColors,
@@ -188,6 +192,17 @@ fun AppNavigationContent(
                         NavigationBarItem(
                             colors = navBarItemColors,
                             selected = currentRoute is Route.Notifications,
+                            onClick = {
+                                if (currentRoute !is Route.Notifications) {
+                                    backStack.add(Route.Notifications)
+                                }
+                            },
+                            icon = { Icon(Icons.Rounded.Notifications, contentDescription = null) },
+                            label = { Text("الإشعارات") }
+                        )
+                        NavigationBarItem(
+                            colors = navBarItemColors,
+                            selected = false,
                             onClick = {
                                 if (currentRoute !is Route.Notifications) {
                                     backStack.add(Route.Notifications)

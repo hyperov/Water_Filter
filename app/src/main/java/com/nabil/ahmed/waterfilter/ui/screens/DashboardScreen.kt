@@ -5,7 +5,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,7 +32,6 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -48,9 +50,11 @@ import com.nabil.ahmed.waterfilter.data.entity.Candle
 import com.nabil.ahmed.waterfilter.data.entity.Filter
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithCandles
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.Alignment
 import com.nabil.ahmed.waterfilter.data.util.CandleNumber
 import com.nabil.ahmed.waterfilter.data.util.FilterType
 import com.nabil.ahmed.waterfilter.data.util.Lifespan
@@ -500,6 +504,7 @@ fun DashboardScreenContent(
     onDeleteCandle: (Candle) -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    var showFilterDropdown by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     // Permission Check (Android 13+)
@@ -527,62 +532,68 @@ fun DashboardScreenContent(
         topBar = {
             TopAppBar(
                 title = {
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Surface(
-                            color = Color(0xFFE2F3EF),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
                             Text(
-                                text = currentFilter?.let { "${it.filter.name} (${it.candles.size} مراحل)" } ?: stringResource(R.string.app_name),
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    color = Color(0xFF0F4C44),
-                                    fontWeight = FontWeight.Bold
+                                text = currentFilter?.filter?.name ?: stringResource(R.string.app_name),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
                             )
-                        }
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = stringResource(R.string.dashboard_header_title),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0D2823)
-                            )
-                        )
+
                     }
                 },
                 navigationIcon = {
-                    Surface(
-                        onClick = { /* notification action */ },
-                        shape = CircleShape,
-                        color = Color.White,
-                        border = BorderStroke(1.dp, Color(0xFFD0E6E0)),
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .size(44.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Rounded.Notifications,
-                                contentDescription = stringResource(R.string.settings),
-                                tint = Color(0xFF4A6B63)
-                            )
+                    Box(modifier = Modifier.padding(start = 12.dp)) {
+                        Surface(
+                            onClick = { /* notification action */ },
+                            shape = CircleShape,
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                            modifier = Modifier.size(42.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Notifications,
+                                    contentDescription = stringResource(R.string.settings),
+                                    tint = Color(0xFF4A6B63),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .align(Alignment.TopStart)
+                                        .padding(top = 2.dp, start = 2.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFE53935))
+                                )
+                            }
                         }
                     }
                 },
                 actions = {
-                    if (currentFilter != null) {
-                        Box {
-                            IconButton(onClick = { showMenu = true }) {
+                    Box(modifier = Modifier.padding(end = 12.dp)) {
+                        Surface(
+                            onClick = { if (currentFilter != null) showMenu = true },
+                            shape = CircleShape,
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                            modifier = Modifier.size(42.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Rounded.MoreVert,
                                     contentDescription = stringResource(R.string.settings),
-                                    tint = Color(0xFF4A6B63)
+                                    tint = Color(0xFF4A6B63),
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
+                        }
+
+                        if (currentFilter != null) {
                             DropdownMenu(
                                 expanded = showMenu,
                                 onDismissRequest = { showMenu = false }
@@ -615,9 +626,18 @@ fun DashboardScreenContent(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAddFilter,
-                icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-                text = { Text(text = stringResource(R.string.add_filter)) },
-                shape = RoundedCornerShape(24.dp)
+                icon = { Icon(Icons.Rounded.Add, contentDescription = null, tint = Color.White) },
+                text = {
+                    Text(
+                        text = stringResource(R.string.add_filter),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    )
+                },
+                shape = CircleShape,
+                containerColor = Color(0xFF00BFA5)
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
