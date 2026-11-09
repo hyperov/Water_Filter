@@ -22,6 +22,9 @@ import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.util.CandleNumber
 import com.nabil.ahmed.waterfilter.data.util.FilterType
 import com.nabil.ahmed.waterfilter.data.util.Lifespan
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.DoneAll
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -147,8 +150,43 @@ fun CandlesConfigurationScreen(
                                 lastChangedTimestamp = timestamp
                             )
                         }
-                    }
+                    },
+                    onLifespanChanged = { newLifespan ->
+                        val index = candles.indexOfFirst { it.candleNumber == candle.candleNumber }
+                        if (index != -1) {
+                            candles[index] = candle.copy(lifespan = newLifespan)
+                        }
+                    },
+                    onRemoveCandle = if (candles.size > 1 && candle.candleNumber.value > filterType.candlesCount) {
+                        { candles.removeIf { it.candleNumber == candle.candleNumber } }
+                    } else null
                 )
+            }
+
+            if (candles.size < 7) {
+                item {
+                    OutlinedButton(
+                        onClick = {
+                            val nextNumber = candles.size + 1
+                            val candleNumber = CandleNumber.fromInt(nextNumber)
+                            val newCandle = CandleConfigState(
+                                candleNumber = candleNumber,
+                                nameResId = candleNumber.nameResId,
+                                descriptionResId = candleNumber.descResId,
+                                lifespan = Lifespan.MONTHS_6
+                            )
+                            candles.add(newCandle)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.add_new_candle))
+                    }
+                }
             }
 
             item {

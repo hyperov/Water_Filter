@@ -47,7 +47,13 @@ import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.Candle
 import com.nabil.ahmed.waterfilter.data.entity.Filter
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithCandles
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import com.nabil.ahmed.waterfilter.data.util.CandleNumber
 import com.nabil.ahmed.waterfilter.data.util.FilterType
+import com.nabil.ahmed.waterfilter.data.util.Lifespan
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import kotlinx.coroutines.launch
 import nl.dionsegijn.konfetti.compose.KonfettiView
@@ -69,6 +75,9 @@ fun DashboardScreen(
     var showDeleteConfirmation by remember { mutableStateOf<Filter?>(null) }
     var editingCandle by remember { mutableStateOf<Candle?>(null) }
     var renamingCandle by remember { mutableStateOf<Candle?>(null) }
+    var editingLifespanCandle by remember { mutableStateOf<Candle?>(null) }
+    var addingCandleFilter by remember { mutableStateOf<FilterWithCandles?>(null) }
+    var deletingCandle by remember { mutableStateOf<Candle?>(null) }
     
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -113,7 +122,10 @@ fun DashboardScreen(
                 }
             },
             onEditDate = { editingCandle = it },
-            onRenameCandle = { renamingCandle = it }
+            onRenameCandle = { renamingCandle = it },
+            onEditLifespan = { editingLifespanCandle = it },
+            onAddCandleToFilter = { filterWithCandles -> addingCandleFilter = filterWithCandles },
+            onDeleteCandle = { candle -> deletingCandle = candle }
         )
 
         if (parties.isNotEmpty()) {
@@ -176,6 +188,127 @@ fun DashboardScreen(
         }
     }
 
+    editingLifespanCandle?.let { candle ->
+        var selectedLifespan by remember { mutableStateOf(candle.lifespanDays) }
+        AlertDialog(
+            onDismissRequest = { editingLifespanCandle = null },
+            title = { Text(text = stringResource(R.string.edit_candle_lifespan)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = stringResource(R.string.candle_lifespan),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Lifespan.entries.forEach { lifespan ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            RadioButton(
+                                selected = selectedLifespan == lifespan,
+                                onClick = { selectedLifespan = lifespan }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = stringResource(lifespan.resId))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.updateCandleLifespan(candle, selectedLifespan)
+                        editingLifespanCandle = null
+                    }
+                ) {
+                    Text(text = stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { editingLifespanCandle = null }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    addingCandleFilter?.let { filterWithCandles ->
+        val nextNumberInt = filterWithCandles.candles.size + 1
+        val nextCandleNumber = CandleNumber.fromInt(nextNumberInt)
+        val defaultName = stringResource(nextCandleNumber.nameResId)
+        
+        var candleName by remember { mutableStateOf(defaultName) }
+        var selectedLifespan by remember { mutableStateOf(Lifespan.MONTHS_6) }
+        var maintenanceTimestamp by remember { mutableLongStateOf(System.currentTimeMillis()) }
+
+        AlertDialog(
+            onDismissRequest = { addingCandleFilter = null },
+            title = { Text(text = stringResource(R.string.add_new_candle)) },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = candleName,
+                        onValueChange = { candleName = it },
+                        label = { Text(stringResource(R.string.candle)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Text(
+                        text = stringResource(R.string.candle_lifespan),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    
+                    Column {
+                        Lifespan.entries.forEach { lifespan ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 2.dp)
+                            ) {
+                                RadioButton(
+                                    selected = selectedLifespan == lifespan,
+                                    onClick = { selectedLifespan = lifespan }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = stringResource(lifespan.resId))
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (candleName.isNotBlank() && filterWithCandles.candles.size < 7) {
+                            viewModel.addCandleToFilter(
+                                filterId = filterWithCandles.filter.id,
+                                candleNumber = nextCandleNumber,
+                                name = candleName,
+                                lifespan = selectedLifespan,
+                                lastChangedTimestamp = maintenanceTimestamp
+                            )
+                            addingCandleFilter = null
+                        }
+                    }
+                ) {
+                    Text(text = stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { addingCandleFilter = null }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     renamingCandle?.let { candle ->
         var newName by remember { mutableStateOf(candle.name) }
         AlertDialog(
@@ -208,6 +341,113 @@ fun DashboardScreen(
                 }
             }
         )
+    }
+
+    deletingCandle?.let { candle ->
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { deletingCandle = null },
+            sheetState = sheetState,
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Red Trash Icon in Soft Red Circle
+                Surface(
+                    color = Color(0xFFFFEBEE),
+                    shape = CircleShape,
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Rounded.Delete,
+                            contentDescription = null,
+                            tint = Color(0xFFD32F2F),
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+
+                // Title
+                Text(
+                    text = stringResource(R.string.delete_candle_confirm_title),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0D2823)
+                    ),
+                    textAlign = TextAlign.Center
+                )
+
+                // Description Message
+                Text(
+                    text = stringResource(R.string.delete_candle_confirm_message, candle.name),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color(0xFF6A8B83)
+                    ),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Primary Red Confirm Button
+                Button(
+                    onClick = {
+                        viewModel.deleteCandle(candle)
+                        deletingCandle = null
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFE53935),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.yes_delete_candle),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Rounded.Delete,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                // Secondary Soft Gray Cancel Button
+                Button(
+                    onClick = { deletingCandle = null },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF2F4F5),
+                        contentColor = Color(0xFF2C3E50)
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.cancel_action),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
     }
 
     showDeleteConfirmation?.let { filter ->
@@ -254,7 +494,10 @@ fun DashboardScreenContent(
     onDeleteFilter: (Filter) -> Unit,
     onMarkAsChanged: (Candle) -> Unit,
     onEditDate: (Candle) -> Unit,
-    onRenameCandle: (Candle) -> Unit
+    onRenameCandle: (Candle) -> Unit,
+    onEditLifespan: (Candle) -> Unit = {},
+    onAddCandleToFilter: (FilterWithCandles) -> Unit = {},
+    onDeleteCandle: (Candle) -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -282,20 +525,52 @@ fun DashboardScreenContent(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Surface(
+                            color = Color(0xFFE2F3EF),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = currentFilter?.let { "${it.filter.name} (${it.candles.size} مراحل)" } ?: stringResource(R.string.app_name),
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = Color(0xFF0F4C44),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = stringResource(R.string.app_name),
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                            text = stringResource(R.string.dashboard_header_title),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0D2823)
+                            )
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.Rounded.WaterDrop,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
+                    }
+                },
+                navigationIcon = {
+                    Surface(
+                        onClick = { /* notification action */ },
+                        shape = CircleShape,
+                        color = Color.White,
+                        border = BorderStroke(1.dp, Color(0xFFD0E6E0)),
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .size(44.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Rounded.Notifications,
+                                contentDescription = stringResource(R.string.settings),
+                                tint = Color(0xFF4A6B63)
+                            )
+                        }
                     }
                 },
                 actions = {
@@ -304,7 +579,8 @@ fun DashboardScreenContent(
                             IconButton(onClick = { showMenu = true }) {
                                 Icon(
                                     imageVector = Icons.Rounded.MoreVert,
-                                    contentDescription = stringResource(R.string.settings)
+                                    contentDescription = stringResource(R.string.settings),
+                                    tint = Color(0xFF4A6B63)
                                 )
                             }
                             DropdownMenu(
@@ -461,7 +737,10 @@ fun DashboardScreenContent(
                             filter = it,
                             onMarkAsChanged = onMarkAsChanged,
                             onEditDate = onEditDate,
-                            onRenameCandle = onRenameCandle
+                            onRenameCandle = onRenameCandle,
+                            onEditLifespan = onEditLifespan,
+                            onAddCandle = { onAddCandleToFilter(it) },
+                            onDeleteCandle = onDeleteCandle
                         )
                     }
                 }

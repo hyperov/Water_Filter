@@ -21,6 +21,11 @@ import androidx.compose.ui.unit.dp
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.util.CandleNumber
 import com.nabil.ahmed.waterfilter.data.util.Lifespan
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Layers
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,10 +34,13 @@ import java.util.*
 @Composable
 fun CandleConfigItem(
     candle: CandleConfigState,
-    onSelectionChanged: (SelectionType, Long?) -> Unit
+    onSelectionChanged: (SelectionType, Long?) -> Unit,
+    onLifespanChanged: ((Lifespan) -> Unit)? = null,
+    onRemoveCandle: (() -> Unit)? = null
 ) {
     val datePickerState = rememberDatePickerState()
     var showDatePicker by remember { mutableStateOf(false) }
+    var showLifespanMenu by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -91,23 +99,61 @@ fun CandleConfigItem(
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(candle.nameResId),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
-                    Text(
-                        text = stringResource(candle.lifespan.resId),
-                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    )
-                    Text(
-                        text = stringResource(candle.descriptionResId),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
+                    
+                    Box {
+                        AssistChip(
+                            onClick = { if (onLifespanChanged != null) showLifespanMenu = true },
+                            label = { Text(text = stringResource(candle.lifespan.resId)) },
+                            trailingIcon = if (onLifespanChanged != null) {
+                                { Icon(imageVector = Icons.Rounded.ArrowDropDown, contentDescription = null) }
+                            } else null,
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                                labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        )
+                        
+                        DropdownMenu(
+                            expanded = showLifespanMenu,
+                            onDismissRequest = { showLifespanMenu = false }
+                        ) {
+                            Lifespan.entries.forEach { lifespanOption ->
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(lifespanOption.resId)) },
+                                    onClick = {
+                                        onLifespanChanged?.invoke(lifespanOption)
+                                        showLifespanMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    if (candle.descriptionResId != 0) {
+                        Text(
+                            text = stringResource(candle.descriptionResId),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                }
+
+                if (onRemoveCandle != null) {
+                    IconButton(onClick = onRemoveCandle) {
+                        Icon(
+                            imageVector = Icons.Rounded.Delete,
+                            contentDescription = stringResource(R.string.remove_candle),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
 

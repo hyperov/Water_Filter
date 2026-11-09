@@ -112,4 +112,23 @@
     <string name="open_settings">فتح الإعدادات</string>
     <string name="start_time">وقت البدء</string>
     <string name="end_time">وقت الانتهاء</string>
+    <string name="add_candle">إضافة شمعة</string>
+    <string name="add_new_candle">إضافة شمعة جديدة</string>
+    <string name="max_candles_reached">تم الوصول للحد الأقصى (7 شمعات)</string>
+    <string name="edit_candle_lifespan">تعديل مدة التغيير</string>
+    <string name="candle_lifespan">مدة تغيير الشمعة</string>
+    <string name="remove_candle">حذف الشمعة</string>
+    <string name="dashboard_header_title">صيانة شمعات الفلتر</string>
+    <string name="overall_efficiency">كفاءة الفلتر الإجمالية</string>
+    <string name="efficiency_excellent">ممتازة ونظيفة</string>
+    <string name="candle_updated_today">تم تحديث الشمعة الأولى بنجاح اليوم</string>
+    <string name="candle_stages">مراحل الشمعات</string>
+    <string name="active_candles_count">%1$d شمعات نشطة</string>
+    <string name="stage_number">مرحلة %1$d</string>
+    <string name="periodic_change">تغيير دوري: %1$s</string>
+    <string name="candle_health_title">صلاحية الشمعة</string>
+    <string name="delete_candle_confirm_title">هل أنت متأكد من حذف هذه الشمعة؟</string>
+    <string name="delete_candle_confirm_message">سيتم إزالة \"%1$s\" وسجل مواعيد صيانتها نهائياً من جدول التنبيهات.</string>
+    <string name="yes_delete_candle">نعم، حذف الشمعة</string>
+    <string name="cancel_action">إلغاء التراجع</string>
 </resources>

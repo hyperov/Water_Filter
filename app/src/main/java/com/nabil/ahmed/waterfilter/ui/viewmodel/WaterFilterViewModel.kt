@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nabil.ahmed.waterfilter.data.entity.*
 import com.nabil.ahmed.waterfilter.data.repository.WaterFilterRepository
+import com.nabil.ahmed.waterfilter.data.util.CandleNumber
 import com.nabil.ahmed.waterfilter.data.util.FilterType
+import com.nabil.ahmed.waterfilter.data.util.Lifespan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,7 +61,33 @@ class WaterFilterViewModel @Inject constructor(
     fun renameCandle(candle: Candle, newName: String) {
         viewModelScope.launch {
             val updatedCandle = candle.copy(name = newName)
-            repository.updateCandle(updatedCandle)
+            repository.updateCandle(updatedCandle, logMaintenance = false)
+        }
+    }
+
+    fun updateCandleLifespan(candle: Candle, newLifespan: Lifespan) {
+        viewModelScope.launch {
+            val updatedCandle = candle.copy(lifespanDays = newLifespan)
+            repository.updateCandle(updatedCandle, logMaintenance = false)
+        }
+    }
+
+    fun addCandleToFilter(
+        filterId: Long,
+        candleNumber: CandleNumber,
+        name: String,
+        lifespan: Lifespan,
+        lastChangedTimestamp: Long
+    ) {
+        viewModelScope.launch {
+            val newCandle = Candle(
+                filterId = filterId,
+                candleNumber = candleNumber,
+                name = name,
+                lifespanDays = lifespan,
+                lastChangedTimestamp = lastChangedTimestamp
+            )
+            repository.addCandleToFilter(newCandle)
         }
     }
 
@@ -75,6 +103,12 @@ class WaterFilterViewModel @Inject constructor(
             if (_selectedFilterId.value == filter.id) {
                 _selectedFilterId.value = null
             }
+        }
+    }
+
+    fun deleteCandle(candle: Candle) {
+        viewModelScope.launch {
+            repository.deleteCandle(candle)
         }
     }
 }

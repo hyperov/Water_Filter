@@ -28,6 +28,9 @@ interface FilterDao {
     @Insert
     suspend fun insertCandles(candles: List<Candle>)
 
+    @Insert
+    suspend fun insertCandle(candle: Candle): Long
+
     @Update
     suspend fun updateCandle(candle: Candle)
 
@@ -42,6 +45,9 @@ interface FilterDao {
 
     @Delete
     suspend fun deleteFilter(filter: Filter)
+
+    @Delete
+    suspend fun deleteCandle(candle: Candle)
 
     @Query("SELECT * FROM candles WHERE filterId = :filterId")
     suspend fun getCandlesByFilterId(filterId: Long): List<Candle>

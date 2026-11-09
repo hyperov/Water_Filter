@@ -1,15 +1,18 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -28,82 +31,105 @@ import com.nabil.ahmed.waterfilter.data.util.FilterType
 import com.nabil.ahmed.waterfilter.data.util.Lifespan
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 
+import androidx.compose.material.icons.rounded.WaterDrop
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
+
 @Composable
 fun DashboardContent(
     filter: FilterWithCandles,
     onMarkAsChanged: (Candle) -> Unit,
     onEditDate: (Candle) -> Unit,
-    onRenameCandle: (Candle) -> Unit
+    onRenameCandle: (Candle) -> Unit,
+    onEditLifespan: (Candle) -> Unit = {},
+    onAddCandle: (() -> Unit)? = null,
+    onDeleteCandle: ((Candle) -> Unit)? = null
 ) {
     val overallHealth = calculateOverallHealth(filter.candles)
-    val progressColor = getHealthColor(overallHealth)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(24.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        contentPadding = PaddingValues(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // ... (previous item block)
+        // Overall Filter Efficiency Banner
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(260.dp),
-                contentAlignment = Alignment.Center
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F4C44))
             ) {
-                // Background Track
-                androidx.compose.foundation.Canvas(modifier = Modifier.size(220.dp)) {
-                    drawArc(
-                        color = Color.LightGray.copy(alpha = 0.2f),
-                        startAngle = 0f,
-                        sweepAngle = 360f,
-                        useCenter = false,
-                        style = Stroke(width = 24.dp.toPx(), cap = StrokeCap.Round)
-                    )
-                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
 
-                val animatedHealth by animateFloatAsState(
-                    targetValue = overallHealth.toFloat(),
-                    animationSpec = tween(durationMillis = 1000),
-                    label = "health_anim"
-                )
-
-                // Progress Arc
-                androidx.compose.foundation.Canvas(modifier = Modifier.size(220.dp)) {
-                    drawArc(
-                        color = progressColor,
-                        startAngle = -90f,
-                        sweepAngle = animatedHealth * 3.6f,
-                        useCenter = false,
-                        style = Stroke(width = 24.dp.toPx(), cap = StrokeCap.Round)
-                    )
-                }
-
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "${overallHealth}%",
-                        style = MaterialTheme.typography.displayLarge.copy(
-                            fontWeight = FontWeight.Black,
-                            fontSize = 56.sp,
-                            color = progressColor
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.overall_efficiency),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFFB0D3CB))
                         )
-                    )
-                    Text(
-                        text = stringResource(R.string.filter_health),
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = FontWeight.Medium
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "${overallHealth}% ${stringResource(R.string.efficiency_excellent)}",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
                         )
-                    )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.candle_updated_today),
+                            style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF88BDB1))
+                        )
+                    }
+
+                    Surface(
+                        color = Color(0xFF1E5B53),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Rounded.WaterDrop,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
 
-        // Section Header
+        // Section Header: Candle Stages
         item {
-            SectionHeader(
-                title = stringResource(R.string.candles_history)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.active_candles_count, filter.candles.size),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF6A8B83))
+                )
+                Text(
+                    text = stringResource(R.string.candle_stages),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0D2823)
+                    )
+                )
+            }
         }
 
         // Individual Candle Cards
@@ -112,8 +138,29 @@ fun DashboardContent(
                 candle = candle,
                 onMarkAsChanged = { onMarkAsChanged(candle) },
                 onEditDate = { onEditDate(candle) },
-                onRename = { onRenameCandle(candle) }
+                onRename = { onRenameCandle(candle) },
+                onEditLifespan = { onEditLifespan(candle) },
+                onDelete = if (filter.candles.size > 1 && onDeleteCandle != null) {
+                    { onDeleteCandle(candle) }
+                } else null
             )
+        }
+
+        // Add Candle Button if candles count < 7
+        if (filter.candles.size < 7 && onAddCandle != null) {
+            item {
+                OutlinedButton(
+                    onClick = onAddCandle,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = stringResource(R.string.add_new_candle))
+                }
+            }
         }
     }
 }

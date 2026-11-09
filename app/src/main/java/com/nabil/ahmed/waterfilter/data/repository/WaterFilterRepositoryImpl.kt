@@ -27,9 +27,8 @@ class WaterFilterRepositoryImpl @Inject constructor(
         return filterId
     }
 
-    override suspend fun updateCandle(candle: Candle) {
-        dao.updateCandle(candle)
-        
+    override suspend fun addCandleToFilter(candle: Candle): Long {
+        val id = dao.insertCandle(candle)
         val log = MaintenanceLog(
             filterId = candle.filterId,
             candleNumber = candle.candleNumber.value,
@@ -37,6 +36,20 @@ class WaterFilterRepositoryImpl @Inject constructor(
             changeDateTimestamp = candle.lastChangedTimestamp
         )
         dao.insertMaintenanceLog(log)
+        return id
+    }
+
+    override suspend fun updateCandle(candle: Candle, logMaintenance: Boolean) {
+        dao.updateCandle(candle)
+        if (logMaintenance) {
+            val log = MaintenanceLog(
+                filterId = candle.filterId,
+                candleNumber = candle.candleNumber.value,
+                candleName = candle.name,
+                changeDateTimestamp = candle.lastChangedTimestamp
+            )
+            dao.insertMaintenanceLog(log)
+        }
     }
 
     override suspend fun deleteMaintenanceLog(log: MaintenanceLog) {
@@ -45,5 +58,9 @@ class WaterFilterRepositoryImpl @Inject constructor(
 
     override suspend fun deleteFilter(filter: Filter) {
         dao.deleteFilter(filter)
+    }
+
+    override suspend fun deleteCandle(candle: Candle) {
+        dao.deleteCandle(candle)
     }
 }
