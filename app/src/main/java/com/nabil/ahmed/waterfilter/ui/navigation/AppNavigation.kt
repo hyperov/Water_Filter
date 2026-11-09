@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -53,7 +52,8 @@ fun AppNavigation(
         dashboardScreen = {
             DashboardScreen(
                 viewModel = viewModel,
-                onAddFilter = { backStack.add(Route.FilterRegistration) }
+                onAddFilter = { backStack.add(Route.FilterRegistration) },
+                onNavigateToNotifications = { backStack.add(Route.Notifications) }
             )
         },
         historyScreen = {
@@ -192,17 +192,6 @@ fun AppNavigationContent(
                         NavigationBarItem(
                             colors = navBarItemColors,
                             selected = currentRoute is Route.Notifications,
-                            onClick = {
-                                if (currentRoute !is Route.Notifications) {
-                                    backStack.add(Route.Notifications)
-                                }
-                            },
-                            icon = { Icon(Icons.Rounded.Notifications, contentDescription = null) },
-                            label = { Text("الإشعارات") }
-                        )
-                        NavigationBarItem(
-                            colors = navBarItemColors,
-                            selected = false,
                             onClick = {
                                 if (currentRoute !is Route.Notifications) {
                                     backStack.add(Route.Notifications)

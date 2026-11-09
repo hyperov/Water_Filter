@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
@@ -50,7 +49,6 @@ import com.nabil.ahmed.waterfilter.data.entity.Candle
 import com.nabil.ahmed.waterfilter.data.entity.Filter
 import com.nabil.ahmed.waterfilter.data.entity.FilterWithCandles
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -70,7 +68,8 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun DashboardScreen(
     viewModel: com.nabil.ahmed.waterfilter.ui.viewmodel.WaterFilterViewModel,
-    onAddFilter: () -> Unit
+    onAddFilter: () -> Unit,
+    onNavigateToNotifications: () -> Unit = {}
 ) {
     val filters by viewModel.allFiltersWithCandles.collectAsStateWithLifecycle()
     val selectedFilterId by viewModel.selectedFilterId.collectAsStateWithLifecycle()
@@ -129,7 +128,8 @@ fun DashboardScreen(
             onRenameCandle = { renamingCandle = it },
             onEditLifespan = { editingLifespanCandle = it },
             onAddCandleToFilter = { filterWithCandles -> addingCandleFilter = filterWithCandles },
-            onDeleteCandle = { candle -> deletingCandle = candle }
+            onDeleteCandle = { candle -> deletingCandle = candle },
+            onNavigateToNotifications = onNavigateToNotifications
         )
 
         if (parties.isNotEmpty()) {
@@ -501,10 +501,10 @@ fun DashboardScreenContent(
     onRenameCandle: (Candle) -> Unit,
     onEditLifespan: (Candle) -> Unit = {},
     onAddCandleToFilter: (FilterWithCandles) -> Unit = {},
-    onDeleteCandle: (Candle) -> Unit = {}
+    onDeleteCandle: (Candle) -> Unit = {},
+    onNavigateToNotifications: () -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    var showFilterDropdown by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     // Permission Check (Android 13+)
@@ -549,7 +549,7 @@ fun DashboardScreenContent(
                 navigationIcon = {
                     Box(modifier = Modifier.padding(start = 12.dp)) {
                         Surface(
-                            onClick = { /* notification action */ },
+                            onClick = onNavigateToNotifications,
                             shape = CircleShape,
                             color = Color.White,
                             border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
