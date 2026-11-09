@@ -120,6 +120,25 @@ fun CandleHealthCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+
+                    // Edit Pencil Button
+                    Surface(
+                        onClick = onRename,
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, healthColor.copy(alpha = 0.3f)),
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Rounded.Edit,
+                                contentDescription = stringResource(R.string.edit),
+                                modifier = Modifier.size(18.dp),
+                                tint = healthColor
+                            )
+                        }
+                    }
+
                     // Options / MoreVert Dropdown Button
                     Box {
                         Surface(
@@ -178,24 +197,6 @@ fun CandleHealthCard(
                             }
                         }
                     }
-
-                    // Edit Pencil Button
-                    Surface(
-                        onClick = onRename,
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, healthColor.copy(alpha = 0.3f)),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Rounded.Edit,
-                                contentDescription = stringResource(R.string.edit),
-                                modifier = Modifier.size(18.dp),
-                                tint = healthColor
-                            )
-                        }
-                    }
                 }
             }
 
@@ -204,7 +205,7 @@ fun CandleHealthCard(
             // Action & Status Row: "Mark as changed" Button + "Remaining Days" Tag
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.End,
+                horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Mark as Changed Button
@@ -267,6 +268,14 @@ fun CandleHealthCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Text(
+                    text = stringResource(R.string.candle_health_title),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+
                 Surface(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(8.dp),
@@ -282,13 +291,6 @@ fun CandleHealthCard(
                     )
                 }
 
-                Text(
-                    text = stringResource(R.string.candle_health_title),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -328,14 +330,16 @@ fun CandleHealthCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Edit,
-                        contentDescription = stringResource(R.string.edit),
-                        modifier = Modifier.size(18.dp),
-                        tint = Color.White
-                    )
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
+
+                        Icon(
+                            imageVector = Icons.Rounded.CalendarToday,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.last_maintenance_date) + ": " + formatDate(candle.lastChangedTimestamp),
                             style = MaterialTheme.typography.bodyMedium.copy(
@@ -343,14 +347,15 @@ fun CandleHealthCard(
                                 fontWeight = FontWeight.SemiBold
                             )
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            imageVector = Icons.Rounded.CalendarToday,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = Color.White
-                        )
                     }
+
+                    Icon(
+                        imageVector = Icons.Rounded.Edit,
+                        contentDescription = stringResource(R.string.edit),
+                        modifier = Modifier.size(18.dp),
+                        tint = Color.White
+                    )
+
                 }
             }
         }
