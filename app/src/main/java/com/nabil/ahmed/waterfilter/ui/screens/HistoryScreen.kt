@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Search
@@ -90,7 +89,7 @@ fun HistoryScreenContent(
     }
 
     val groupedLogs = remember(filteredLogs) {
-        val sdf = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+        val sdf = SimpleDateFormat("MMMM yyyy", Locale.forLanguageTag("ar"))
         filteredLogs.groupBy { log ->
             sdf.format(Date(log.changeDateTimestamp))
         }
@@ -318,7 +317,10 @@ fun HistoryScreenContent(
                             )
                         }
                         Text(
-                            text = if (mostReplacedCount > 0) stringResource(R.string.times_count, mostReplacedCount) else "-",
+                            text = if (mostReplacedCount > 0) stringResource(
+                                R.string.times_count,
+                                mostReplacedCount
+                            ) else "-",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = Color(0xFF64748B),
                                 fontSize = 11.sp
@@ -381,11 +383,15 @@ fun HistoryScreenContent(
             ) {
                 Surface(
                     onClick = {
-                        Toast.makeText(context, R.string.search_log_placeholder, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, R.string.search_log_placeholder, Toast.LENGTH_SHORT)
+                            .show()
                     },
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surface,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    ),
                     modifier = Modifier.size(52.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -479,8 +485,15 @@ fun HistoryScreenContent(
                                 Button(
                                     onClick = onNavigateToDashboard,
                                     shape = RoundedCornerShape(16.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00A86B)),
-                                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(
+                                            0xFF00A86B
+                                        )
+                                    ),
+                                    contentPadding = PaddingValues(
+                                        horizontal = 24.dp,
+                                        vertical = 12.dp
+                                    )
                                 ) {
                                     Icon(Icons.Rounded.Home, contentDescription = null)
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -506,22 +519,15 @@ fun HistoryScreenContent(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Surface(
-                                            shape = RoundedCornerShape(12.dp),
-                                            color = Color(0xFFE2E8F0)
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.times_count, monthLogs.size),
-                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                                style = MaterialTheme.typography.labelSmall.copy(
-                                                    fontSize = 11.sp,
-                                                    fontWeight = FontWeight.Medium,
-                                                    color = Color(0xFF475569)
-                                                )
-                                            )
-                                        }
 
                                         Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(14.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(0xFF00A86B))
+                                            )
+                                            Spacer(modifier = Modifier.width(10.dp))
                                             Text(
                                                 text = month,
                                                 style = MaterialTheme.typography.titleMedium.copy(
@@ -530,81 +536,41 @@ fun HistoryScreenContent(
                                                     fontSize = 16.sp
                                                 )
                                             )
-                                            Spacer(modifier = Modifier.width(10.dp))
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(14.dp)
-                                                    .clip(CircleShape)
-                                                    .background(Color(0xFF00A86B))
+                                        }
+
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = Color(0xFFE2E8F0)
+                                        ) {
+                                            Text(
+                                                text = stringResource(
+                                                    R.string.times_count,
+                                                    monthLogs.size
+                                                ),
+                                                modifier = Modifier.padding(
+                                                    horizontal = 10.dp,
+                                                    vertical = 4.dp
+                                                ),
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = Color(0xFF475569)
+                                                )
                                             )
                                         }
+
+
                                     }
                                 }
                             }
 
                             itemsIndexed(monthLogs, key = { _, log -> log.id }) { _, log ->
-                                val currentOnDeleteLog by rememberUpdatedState(onDeleteLog)
-                                val dismissState = rememberSwipeToDismissBoxState(
-                                    confirmValueChange = {
-                                        if (it == SwipeToDismissBoxValue.EndToStart) {
-                                            currentOnDeleteLog(log)
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    }
-                                )
 
                                 Row(
                                     modifier = Modifier
                                         .padding(horizontal = 20.dp)
                                         .height(IntrinsicSize.Min)
                                 ) {
-                                    SwipeToDismissBox(
-                                        state = dismissState,
-                                        enableDismissFromStartToEnd = false,
-                                        backgroundContent = {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .padding(vertical = 6.dp)
-                                                    .clip(RoundedCornerShape(20.dp))
-                                                    .background(MaterialTheme.colorScheme.error),
-                                                contentAlignment = Alignment.CenterEnd
-                                            ) {
-                                                Row(
-                                                    modifier = Modifier.padding(end = 20.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Rounded.Delete,
-                                                        contentDescription = stringResource(R.string.delete),
-                                                        tint = Color.White
-                                                    )
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                    Text(
-                                                        text = stringResource(R.string.delete),
-                                                        style = MaterialTheme.typography.titleMedium.copy(
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = Color.White
-                                                        )
-                                                    )
-                                                }
-                                            }
-                                        },
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(vertical = 6.dp)
-                                    ) {
-                                        HistoryLogCard(
-                                            log = log,
-                                            filterName = filterNameMap[log.filterId] ?: "",
-                                            onDelete = { onDeleteLog(log) }
-                                        )
-                                    }
-
-                                    Spacer(modifier = Modifier.width(14.dp))
-
                                     // Timeline Dotted Line
                                     Box(
                                         modifier = Modifier
@@ -626,6 +592,13 @@ fun HistoryScreenContent(
                                             )
                                         }
                                     }
+                                    Spacer(modifier = Modifier.width(14.dp))
+                                    HistoryLogCard(
+                                        log = log,
+                                        filterName = filterNameMap[log.filterId] ?: "",
+                                        onDelete = { onDeleteLog(log) }
+                                    )
+
                                 }
                             }
                         }
