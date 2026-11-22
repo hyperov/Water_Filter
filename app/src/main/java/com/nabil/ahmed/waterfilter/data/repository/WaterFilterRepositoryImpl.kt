@@ -4,6 +4,7 @@ import com.nabil.ahmed.waterfilter.data.dao.FilterDao
 import com.nabil.ahmed.waterfilter.data.entity.*
 import com.nabil.ahmed.waterfilter.data.util.FilterType
 import kotlinx.coroutines.flow.Flow
+import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,19 +30,29 @@ class WaterFilterRepositoryImpl @Inject constructor(
 
     override suspend fun addCandleToFilter(candle: Candle): Long {
         val id = dao.insertCandle(candle)
-        val log = MaintenanceLog(
-            filterId = candle.filterId,
-            candleNumber = candle.candleNumber.value,
-            candleName = candle.name,
-            changeDateTimestamp = candle.lastChangedTimestamp
-        )
-        dao.insertMaintenanceLog(log)
+        val candleWithId = candle.copy(id = id)
+        upsertMaintenanceLog(candleWithId)
         return id
     }
 
     override suspend fun updateCandle(candle: Candle, logMaintenance: Boolean) {
         dao.updateCandle(candle)
         if (logMaintenance) {
+            upsertMaintenanceLog(candle)
+        }
+    }
+
+    private suspend fun upsertMaintenanceLog(candle: Candle) {
+        val existingLogs = dao.getMaintenanceLogsForCandle(candle.filterId, candle.candleNumber.value)
+        val sameDayLog = existingLogs.find { isSameDay(it.changeDateTimestamp, candle.lastChangedTimestamp) }
+        if (sameDayLog != null) {
+            dao.updateMaintenanceLog(
+                sameDayLog.copy(
+                    candleName = candle.name,
+                    changeDateTimestamp = candle.lastChangedTimestamp
+                )
+            )
+        } else {
             val log = MaintenanceLog(
                 filterId = candle.filterId,
                 candleNumber = candle.candleNumber.value,
@@ -50,6 +61,13 @@ class WaterFilterRepositoryImpl @Inject constructor(
             )
             dao.insertMaintenanceLog(log)
         }
+    }
+
+    private fun isSameDay(timestamp1: Long, timestamp2: Long): Boolean {
+        val cal1 = Calendar.getInstance().apply { timeInMillis = timestamp1 }
+        val cal2 = Calendar.getInstance().apply { timeInMillis = timestamp2 }
+        return (cal1[Calendar.YEAR] == cal2[Calendar.YEAR]) &&
+                (cal1[Calendar.DAY_OF_YEAR] == cal2[Calendar.DAY_OF_YEAR])
     }
 
     override suspend fun deleteMaintenanceLog(log: MaintenanceLog) {

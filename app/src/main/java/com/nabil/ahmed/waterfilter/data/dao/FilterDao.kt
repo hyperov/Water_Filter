@@ -37,6 +37,12 @@ interface FilterDao {
     @Insert
     suspend fun insertMaintenanceLog(log: MaintenanceLog)
 
+    @Update
+    suspend fun updateMaintenanceLog(log: MaintenanceLog)
+
+    @Query("SELECT * FROM maintenance_logs WHERE filterId = :filterId AND candleNumber = :candleNumber ORDER BY changeDateTimestamp DESC")
+    suspend fun getMaintenanceLogsForCandle(filterId: Long, candleNumber: Int): List<MaintenanceLog>
+
     @Query("SELECT * FROM maintenance_logs ORDER BY changeDateTimestamp DESC")
     fun getAllMaintenanceLogs(): Flow<List<MaintenanceLog>>
 
