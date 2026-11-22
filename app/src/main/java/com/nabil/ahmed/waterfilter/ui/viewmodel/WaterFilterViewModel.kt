@@ -35,6 +35,10 @@ class WaterFilterViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val allMaintenanceLogs: StateFlow<List<MaintenanceLog>> = repository.getAllMaintenanceLogs()
+        .map { logs ->
+            logs.distinctBy { it.id }
+                .distinctBy { Triple(it.filterId, it.candleNumber, it.changeDateTimestamp) }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _selectedFilterId = MutableStateFlow<Long?>(null)

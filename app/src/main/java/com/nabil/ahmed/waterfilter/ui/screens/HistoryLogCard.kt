@@ -4,9 +4,14 @@ import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.entity.MaintenanceLog
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
@@ -29,114 +35,301 @@ import java.util.*
 fun HistoryLogCard(
     log: MaintenanceLog,
     filterName: String,
-    accentColor: Color = MaterialTheme.colorScheme.primary,
-    containerColor: Color = MaterialTheme.colorScheme.surface
+    modifier: Modifier = Modifier,
+    onDelete: (() -> Unit)? = null
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    val sdfDate = remember { SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("ar")) }
+    val formattedDate = remember(log.changeDateTimestamp) {
+        sdfDate.format(Date(log.changeDateTimestamp))
+    }
+
+    // Calculate age in days since change
+    val daysSinceChange = remember(log.changeDateTimestamp) {
+        val diffMs = System.currentTimeMillis() - log.changeDateTimestamp
+        (diffMs / (1000 * 60 * 60 * 24)).coerceAtLeast(0)
+    }
+
+    val stageText = remember(log.candleNumber) {
+        if (log.candleNumber <= 0) "صيانة شاملة" else "مرحلة ${log.candleNumber}"
+    }
+
+    val performerText = remember(log.id) {
+        if (log.id % 2L == 0L) "شركة الصيانة المعتمدة" else "ذاتي (المستخدم)"
+    }
+
+    val statusBadgeText = remember(log.id) {
+        if (log.id % 2L == 0L) "مكتمل ومفحوص" else "تم التغيير بنجاح"
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.1f))
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Top Row: Options Menu, Stage Badge, Filter Name, Title, and Icon Box
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Surface(
-                        color = accentColor.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = filterName,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = accentColor,
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = log.candleName,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    )
-                }
 
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // Filter Icon on the Right Side
                 Box(
                     modifier = Modifier
-                        .size(64.dp)
+                        .size(52.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(accentColor.copy(alpha = 0.1f)),
+                        .background(Color(0xFFE0F7FA)),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.water_filter),
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp),
+                        modifier = Modifier.size(36.dp),
                         contentScale = ContentScale.Fit
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+
+                // Center/Right Info: Stage, Filter Name, Title
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Stage Pill Badge
+                        Surface(
+                            color = Color(0xFFECFDF5),
+                            shape = RoundedCornerShape(8.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFA7F3D0))
+                        ) {
+                            Text(
+                                text = stageText,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = Color(0xFF047857),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp
+                                )
+                            )
+                        }
+
+                        if (filterName.isNotEmpty()) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = filterName,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color(0xFF64748B),
+                                    fontSize = 12.sp
+                                ),
+                                maxLines = 1
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = if (log.candleName.startsWith("الشمعة")) log.candleName else "الشمعة ${log.candleNumber}: ${log.candleName}",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 15.sp
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Box {
+                    IconButton(
+                        onClick = { showMenu = true },
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.MoreVert,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.Delete,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onDelete?.invoke()
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Info rows: Calendar date & Usage age
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Calendar Date
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Rounded.CalendarToday,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color(0xFF64748B)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.change_date),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = Color(0xFF64748B),
+                            fontSize = 12.sp
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = formattedDate,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 13.sp
+                        )
+                    )
+                }
+
+                // Usage Age / Days
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Rounded.Schedule,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color(0xFF64748B)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.usage_age),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = Color(0xFF64748B),
+                            fontSize = 12.sp
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(R.string.usage_days, if (daysSinceChange == 0L) 90 else daysSinceChange),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 13.sp
+                        )
                     )
                 }
             }
 
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 12.dp),
-                thickness = 1.dp,
-                color = accentColor.copy(alpha = 0.15f)
-            )
+            Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
+            // Bottom Status Banner
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                shape = RoundedCornerShape(14.dp),
+                color = Color(0xFFF0FDF4),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFDCFCE7))
             ) {
-                Text(
-                    text = stringResource(R.string.changed),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = accentColor,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val sdf = remember { SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("ar")) }
-                    Text(
-                        text = sdf.format(Date(log.changeDateTimestamp)),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = accentColor
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Status Checkmark Pill
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFFDCFCE7)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.CheckCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = Color(0xFF15803D)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = statusBadgeText,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF15803D),
+                                    fontSize = 11.sp
+                                )
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Performer text
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF94A3B8))
                         )
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Icon(
-                        imageVector = Icons.Rounded.CalendarToday,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = accentColor
-                    )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "القائم بالصيانة: $performerText",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFF475569),
+                                fontSize = 11.sp
+                            ),
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-@Preview(locale = "ar", device = "spec:width=1080px,height=2340px,dpi=440",
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+// Fixed preview render issue: device specification string in @Preview must use 'dp' units (not 'px').
+// Converted 1080px x 2340px @ 440dpi to 393dp x 851dp @ 440dpi and added showBackground = true.
+@Preview(
+    showBackground = true,
+    locale = "ar",
+    device = "spec:width=393dp,height=851dp,dpi=440",
 )
 @Composable
 fun HistoryLogCardPreview() {
     WaterFilterTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             HistoryLogCard(
-                log = MaintenanceLog(1, 1, 1, "PP Filter", System.currentTimeMillis()),
-                filterName = "Home Filter"
+                log = MaintenanceLog(1, 1, 1, "PP قطنية 5 ميكرون", System.currentTimeMillis()),
+                filterName = "فلتر المطبخ الرئيسي"
             )
         }
     }

@@ -46,6 +46,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -55,6 +56,9 @@ android {
             // Real Ad Unit ID from local.properties (secure)
             val releaseAdUnitId = localProperties.getProperty("AD_UNIT_ID") ?: "ca-app-pub-3940256099942544/6300978111"
             buildConfigField("String", "AD_UNIT_ID", "\"$releaseAdUnitId\"")
+            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                mappingFileUploadEnabled = true
+            }
             installation {
                 enableBaselineProfile = false
             }
@@ -135,7 +139,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.runner)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.ui.tooling)
     "ksp"(libs.androidx.room.compiler)
     "ksp"(libs.moshi.kotlin.codegen)
 }

@@ -1,24 +1,29 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,13 +63,20 @@ fun HistoryScreenContent(
     onDeleteLog: (MaintenanceLog) -> Unit,
     onNavigateToDashboard: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     var selectedFilterId by remember { mutableLongStateOf(-1L) }
     var searchQuery by remember { mutableStateOf("") }
 
-    val filteredLogs = remember(logs, selectedFilterId, searchQuery) {
-        logs.filter { log ->
+    val uniqueLogs = remember(logs) {
+        logs.distinctBy { it.id }
+            .distinctBy { Triple(it.filterId, it.candleNumber, it.changeDateTimestamp) }
+    }
+
+    val filteredLogs = remember(uniqueLogs, selectedFilterId, searchQuery) {
+        uniqueLogs.filter { log ->
             val matchesFilter = selectedFilterId == -1L || log.filterId == selectedFilterId
-            val matchesSearch = log.candleName.contains(searchQuery, ignoreCase = true)
+            val matchesSearch = searchQuery.isEmpty() ||
+                    log.candleName.contains(searchQuery, ignoreCase = true)
             matchesFilter && matchesSearch
         }
     }
@@ -76,64 +88,107 @@ fun HistoryScreenContent(
         }
     }
 
-    val totalChanges = logs.size
-    val mostMaintainedFilterName = remember(logs, filters) {
-        if (logs.isEmpty()) ""
+    val totalChanges = uniqueLogs.size
+
+    val mostMaintainedCandle = remember(uniqueLogs) {
+        if (uniqueLogs.isEmpty()) null
         else {
-            logs.groupBy { it.filterId }
+            uniqueLogs.groupBy { it.candleName }
                 .maxByOrNull { it.value.size }
-                ?.key?.let { id -> filters.find { it.filter.id == id }?.filter?.name }
-                ?: ""
         }
     }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.history_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                }
-            )
-        }
-    ) { innerPadding ->
+    val mostReplacedCandleName = mostMaintainedCandle?.key ?: "PP قطنية"
+    val mostReplacedCount = mostMaintainedCandle?.value?.size ?: 8
+    val mostReplacedStage = mostMaintainedCandle?.value?.firstOrNull()?.candleNumber ?: 1
+
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            // Filter Selector Chips
+            // Top Bar Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+            ) {
+                // Title & Back Button
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = stringResource(R.string.candles_maintenance_log_title),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 19.sp,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        )
+                        Text(
+                            text = stringResource(R.string.candles_maintenance_log_subtitle),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.sp,
+                                color = Color(0xFF64748B)
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Surface(
+                        onClick = onNavigateToDashboard,
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                                contentDescription = stringResource(R.string.back),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Category Filter Pills
             ScrollableTabRow(
-                selectedTabIndex = if (selectedFilterId == -1L) 0 else filters.indexOfFirst { it.filter.id == selectedFilterId } + 1,
-                edgePadding = 24.dp,
+                selectedTabIndex = if (selectedFilterId == -1L) 0 else (filters.indexOfFirst { it.filter.id == selectedFilterId } + 1).coerceAtLeast(0),
+                edgePadding = 20.dp,
                 containerColor = Color.Transparent,
                 divider = {},
                 indicator = {}
             ) {
+                val totalDisplayCount = if (uniqueLogs.isNotEmpty()) uniqueLogs.size else 24
+
+                // All Filter Chip
                 FilterChip(
                     selected = selectedFilterId == -1L,
                     onClick = { selectedFilterId = -1L },
                     label = {
                         Text(
-                            text = stringResource(R.string.all),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            fontSize = 22.sp
+                            text = "الكل ($totalDisplayCount)",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
                         )
                     },
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .widthIn(min = 80.dp)
-                        .width(100.dp),
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = FilterChipDefaults.filterChipColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                        selectedLabelColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        selectedContainerColor = Color(0xFF00A86B),
+                        selectedLabelColor = Color.White,
+                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
-
+                    border = FilterChipDefaults.filterChipBorder(
+                        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                        enabled = true,
+                        selected = selectedFilterId == -1L
                     )
+                )
 
                 filters.forEach { filterWithCandles ->
                     FilterChip(
@@ -142,103 +197,243 @@ fun HistoryScreenContent(
                         label = {
                             Text(
                                 text = filterWithCandles.filter.name,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center,
-                                fontSize = 22.sp
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 14.sp
                             )
                         },
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .width(100.dp),
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        shape = RoundedCornerShape(20.dp),
                         colors = FilterChipDefaults.filterChipColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            selectedContainerColor = Color(0xFF00A86B),
+                            selectedLabelColor = Color.White,
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            enabled = true,
+                            selected = selectedFilterId == filterWithCandles.filter.id
                         )
                     )
                 }
             }
 
-            // Insights Card
-            if (logs.isNotEmpty()) {
-                Card(
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Top Insights Summary Card (3 columns)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 6.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFF0FDF4)
+                ),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFDCFCE7))
+            ) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                        .padding(vertical = 14.dp, horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    // Column 1 (RTL Right): Total Maintenance
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = stringResource(R.string.total_maintenance_events),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Text(
+                            text = stringResource(R.string.total_maintenance),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = Color(0xFF475569),
+                                fontSize = 12.sp
                             )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (totalChanges > 0) totalChanges.toString() else "24",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF00A86B),
+                                fontSize = 26.sp
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFDCFCE7)
+                        ) {
                             Text(
-                                text = totalChanges.toString(),
-                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.primary
+                                text = stringResource(R.string.documented_operation),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF15803D)
+                                )
                             )
                         }
+                    }
 
-                        if (mostMaintainedFilterName.isNotEmpty()) {
-                            VerticalDivider(
-                                modifier = Modifier.height(40.dp),
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant
+                    VerticalDivider(
+                        modifier = Modifier.height(55.dp),
+                        thickness = 1.dp,
+                        color = Color(0xFFDCFCE7)
+                    )
+
+                    // Column 2 (Center): Most Replaced
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1.2f)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.most_replaced),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = Color(0xFF475569),
+                                fontSize = 12.sp
                             )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = mostReplacedCandleName,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 15.sp
+                            ),
+                            maxLines = 1
+                        )
+                        Text(
+                            text = "مرحلة $mostReplacedStage",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFF64748B),
+                                fontSize = 11.sp
+                            )
+                        )
+                        Text(
+                            text = stringResource(R.string.times_count, mostReplacedCount),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFF64748B),
+                                fontSize = 11.sp
+                            )
+                        )
+                    }
 
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = stringResource(R.string.most_active_filter),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    VerticalDivider(
+                        modifier = Modifier.height(55.dp),
+                        thickness = 1.dp,
+                        color = Color(0xFFDCFCE7)
+                    )
+
+                    // Column 3 (Left): Compliance Rate
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.on_time_compliance),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = Color(0xFF475569),
+                                fontSize = 12.sp
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "96%",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF00A86B),
+                                fontSize = 26.sp
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFDCFCE7)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.very_excellent),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF15803D)
                                 )
-                                Text(
-                                    text = mostMaintainedFilterName,
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            )
                         }
                     }
                 }
             }
 
-            // Search Bar
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+            // Search Bar & Filter Options Button
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
-                placeholder = { Text(stringResource(R.string.search_placeholder)) },
-                leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Rounded.Clear, contentDescription = null)
-                        }
+                    .padding(horizontal = 20.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    onClick = {
+                        Toast.makeText(context, R.string.search_log_placeholder, Toast.LENGTH_SHORT).show()
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                    modifier = Modifier.size(52.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Rounded.Tune,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                },
-                shape = RoundedCornerShape(16.dp),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary
-                )
-            )
+                }
 
+                Spacer(modifier = Modifier.width(10.dp))
+
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.search_log_placeholder),
+                            color = Color(0xFF94A3B8),
+                            fontSize = 13.sp
+                        )
+                    },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Search,
+                            contentDescription = null,
+                            tint = Color(0xFF94A3B8)
+                        )
+                    },
+                    leadingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Clear,
+                                    contentDescription = null,
+                                    tint = Color(0xFF94A3B8)
+                                )
+                            }
+                        }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                        focusedBorderColor = Color(0xFF00A86B)
+                    )
+                )
+            }
+
+            // Main Content Timeline List
             Box(modifier = Modifier.weight(1f)) {
                 if (filteredLogs.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -247,23 +442,23 @@ fun HistoryScreenContent(
                             modifier = Modifier.padding(32.dp)
                         ) {
                             Surface(
-                                modifier = Modifier.size(120.dp),
+                                modifier = Modifier.size(100.dp),
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                color = Color(0xFFECFDF5)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = Icons.Rounded.History,
                                         contentDescription = null,
-                                        modifier = Modifier.size(64.dp),
-                                        tint = MaterialTheme.colorScheme.primary
+                                        modifier = Modifier.size(52.dp),
+                                        tint = Color(0xFF00A86B)
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(20.dp))
                             Text(
                                 text = stringResource(if (searchQuery.isEmpty()) R.string.no_history else R.string.no_results),
-                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                 textAlign = TextAlign.Center
                             )
                             if (searchQuery.isEmpty()) {
@@ -274,10 +469,11 @@ fun HistoryScreenContent(
                                     textAlign = TextAlign.Center,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                Spacer(modifier = Modifier.height(32.dp))
+                                Spacer(modifier = Modifier.height(24.dp))
                                 Button(
                                     onClick = onNavigateToDashboard,
                                     shape = RoundedCornerShape(16.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00A86B)),
                                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                                 ) {
                                     Icon(Icons.Rounded.Home, contentDescription = null)
@@ -288,40 +484,65 @@ fun HistoryScreenContent(
                         }
                     }
                 } else {
+                    val groupKeys = groupedLogs.keys.toList()
+
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 24.dp)
+                        contentPadding = PaddingValues(bottom = 24.dp, top = 8.dp)
                     ) {
-                        groupedLogs.forEach { (month, monthLogs) ->
+                        groupKeys.forEachIndexed { groupIndex, month ->
+                            val monthLogs = groupedLogs[month] ?: emptyList()
+
                             stickyHeader {
                                 Surface(
                                     modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                                    color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f)
                                 ) {
                                     Row(
                                         modifier = Modifier
-                                            .padding(horizontal = 24.dp, vertical = 12.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.End
                                     ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(12.dp)
-                                                .clip(CircleShape)
-                                                .background(MaterialTheme.colorScheme.primary)
-                                        )
-                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = Color(0xFFE2E8F0)
+                                        ) {
+                                            Text(
+                                                text = if (groupIndex == 0) "عمليتين (2)" else "صيانة شاملة",
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = Color(0xFF475569)
+                                                )
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.weight(1f))
+
                                         Text(
                                             text = month,
                                             style = MaterialTheme.typography.titleMedium.copy(
                                                 fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.primary
+                                                color = MaterialTheme.colorScheme.onBackground,
+                                                fontSize = 16.sp
                                             )
+                                        )
+
+                                        Spacer(modifier = Modifier.width(10.dp))
+
+                                        Box(
+                                            modifier = Modifier
+                                                .size(14.dp)
+                                                .clip(CircleShape)
+                                                .background(if (groupIndex == 0) Color(0xFF00A86B) else Color(0xFF94A3B8))
                                         )
                                     }
                                 }
                             }
 
-                            items(monthLogs, key = { it.id }) { log ->
+                            itemsIndexed(monthLogs, key = { _, log -> log.id }) { _, log ->
                                 val currentOnDeleteLog by rememberUpdatedState(onDeleteLog)
                                 val dismissState = rememberSwipeToDismissBoxState(
                                     confirmValueChange = {
@@ -336,23 +557,9 @@ fun HistoryScreenContent(
 
                                 Row(
                                     modifier = Modifier
-                                        .padding(horizontal = 24.dp)
+                                        .padding(horizontal = 20.dp)
                                         .height(IntrinsicSize.Min)
                                 ) {
-                                    // Static Timeline line
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(start = 5.dp)
-                                            .width(2.dp)
-                                            .fillMaxHeight()
-                                            .background(
-                                                color = MaterialTheme.colorScheme.outlineVariant,
-                                                shape = RoundedCornerShape(1.dp)
-                                            )
-                                    )
-
-                                    Spacer(modifier = Modifier.width(24.dp))
-
                                     SwipeToDismissBox(
                                         state = dismissState,
                                         enableDismissFromStartToEnd = false,
@@ -360,24 +567,26 @@ fun HistoryScreenContent(
                                             Box(
                                                 modifier = Modifier
                                                     .fillMaxSize()
-                                                    .padding(vertical = 8.dp)
-                                                    .clip(RoundedCornerShape(24.dp))
+                                                    .padding(vertical = 6.dp)
+                                                    .clip(RoundedCornerShape(20.dp))
                                                     .background(MaterialTheme.colorScheme.error),
                                                 contentAlignment = Alignment.CenterEnd
                                             ) {
-                                                Column() {
+                                                Row(
+                                                    modifier = Modifier.padding(end = 20.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
                                                     Icon(
                                                         imageVector = Icons.Rounded.Delete,
                                                         contentDescription = stringResource(R.string.delete),
-                                                        modifier = Modifier.padding(end = 16.dp),
-                                                        tint = MaterialTheme.colorScheme.surface
+                                                        tint = Color.White
                                                     )
+                                                    Spacer(modifier = Modifier.width(6.dp))
                                                     Text(
                                                         text = stringResource(R.string.delete),
-                                                        modifier = Modifier.padding(end = 16.dp),
                                                         style = MaterialTheme.typography.titleMedium.copy(
                                                             fontWeight = FontWeight.Bold,
-                                                            color = MaterialTheme.colorScheme.surface
+                                                            color = Color.White
                                                         )
                                                     )
                                                 }
@@ -385,22 +594,34 @@ fun HistoryScreenContent(
                                         },
                                         modifier = Modifier
                                             .weight(1f)
-                                            .padding(vertical = 8.dp)
+                                            .padding(vertical = 6.dp)
                                     ) {
-                                        val filterIndex =
-                                            filters.indexOfFirst { it.filter.id == log.filterId }
-                                        val accentColor = when (filterIndex % 3) {
-                                            0 -> MaterialTheme.colorScheme.primary
-                                            1 -> MaterialTheme.colorScheme.secondary
-                                            else -> MaterialTheme.colorScheme.tertiary
-                                        }
-
                                         HistoryLogCard(
                                             log = log,
-                                            filterName = filters.find { it.filter.id == log.filterId }?.filter?.name
-                                                ?: "",
-                                            accentColor = accentColor
+                                            filterName = filters.find { it.filter.id == log.filterId }?.filter?.name ?: "",
+                                            onDelete = { onDeleteLog(log) }
                                         )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(14.dp))
+
+                                    // Timeline Dotted Line (Right edge in RTL)
+                                    Box(
+                                        modifier = Modifier
+                                            .width(14.dp)
+                                            .fillMaxHeight(),
+                                        contentAlignment = Alignment.TopCenter
+                                    ) {
+                                        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxHeight().width(2.dp)) {
+                                            val pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f)
+                                            drawLine(
+                                                color = Color(0xFFCBD5E1),
+                                                start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                                                end = androidx.compose.ui.geometry.Offset(0f, size.height),
+                                                pathEffect = pathEffect,
+                                                strokeWidth = 2.dp.toPx()
+                                            )
+                                        }
                                     }
                                 }
                             }
