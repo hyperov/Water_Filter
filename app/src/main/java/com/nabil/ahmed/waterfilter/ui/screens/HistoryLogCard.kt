@@ -154,9 +154,9 @@ fun HistoryLogCard(
                         modifier = Modifier.size(28.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.MoreVert,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            imageVector = Icons.Rounded.Delete,
+                            contentDescription = stringResource(R.string.remove_candle),
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
 

@@ -2,9 +2,12 @@ package com.nabil.ahmed.waterfilter.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.platform.LocalContext
@@ -55,7 +59,7 @@ fun HistoryScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HistoryScreenContent(
     logs: List<MaintenanceLog>,
@@ -66,6 +70,10 @@ fun HistoryScreenContent(
     val context = LocalContext.current
     var selectedFilterId by remember { mutableLongStateOf(-1L) }
     var searchQuery by remember { mutableStateOf("") }
+
+    val filterNameMap = remember(filters) {
+        filters.associate { it.filter.id to it.filter.name }
+    }
 
     val uniqueLogs = remember(logs) {
         logs.distinctBy { it.id }
@@ -82,7 +90,7 @@ fun HistoryScreenContent(
     }
 
     val groupedLogs = remember(filteredLogs) {
-        val sdf = SimpleDateFormat("MMMM yyyy", Locale.forLanguageTag("ar"))
+        val sdf = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
         filteredLogs.groupBy { log ->
             sdf.format(Date(log.changeDateTimestamp))
         }
@@ -98,9 +106,11 @@ fun HistoryScreenContent(
         }
     }
 
-    val mostReplacedCandleName = mostMaintainedCandle?.key ?: "PP قطنية"
-    val mostReplacedCount = mostMaintainedCandle?.value?.size ?: 8
-    val mostReplacedStage = mostMaintainedCandle?.value?.firstOrNull()?.candleNumber ?: 1
+    val mostReplacedCandleName = mostMaintainedCandle?.key ?: "-"
+    val mostReplacedCount = mostMaintainedCandle?.value?.size ?: 0
+    val mostReplacedStage = mostMaintainedCandle?.value?.firstOrNull()?.candleNumber ?: 0
+
+    val dashPathEffect = remember { PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f) }
 
     Scaffold { innerPadding ->
         Column(
@@ -115,82 +125,77 @@ fun HistoryScreenContent(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Title & Back Button
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = stringResource(R.string.candles_maintenance_log_title),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 19.sp,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
+                Column {
+                    Text(
+                        text = stringResource(R.string.candles_maintenance_log_title),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 19.sp,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
-                        Text(
-                            text = stringResource(R.string.candles_maintenance_log_subtitle),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 12.sp,
-                                color = Color(0xFF64748B)
-                            )
+                    )
+                    Text(
+                        text = stringResource(R.string.candles_maintenance_log_subtitle),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Surface(
-                        onClick = onNavigateToDashboard,
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                                contentDescription = stringResource(R.string.back),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
+                    )
+                }
+
+                IconButton(
+                    onClick = onNavigateToDashboard,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            shape = CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                        contentDescription = stringResource(R.string.back),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
 
-            // Category Filter Pills
-            ScrollableTabRow(
-                selectedTabIndex = if (selectedFilterId == -1L) 0 else (filters.indexOfFirst { it.filter.id == selectedFilterId } + 1).coerceAtLeast(0),
-                edgePadding = 20.dp,
-                containerColor = Color.Transparent,
-                divider = {},
-                indicator = {}
+            // Category Filter Pills (Using LazyRow instead of ScrollableTabRow)
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                val totalDisplayCount = if (uniqueLogs.isNotEmpty()) uniqueLogs.size else 24
-
-                // All Filter Chip
-                FilterChip(
-                    selected = selectedFilterId == -1L,
-                    onClick = { selectedFilterId = -1L },
-                    label = {
-                        Text(
-                            text = "الكل ($totalDisplayCount)",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                item {
+                    FilterChip(
+                        selected = selectedFilterId == -1L,
+                        onClick = { selectedFilterId = -1L },
+                        label = {
+                            Text(
+                                text = "${stringResource(R.string.all)} (${uniqueLogs.size})",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        },
+                        shape = RoundedCornerShape(20.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            selectedContainerColor = Color(0xFF00A86B),
+                            selectedLabelColor = Color.White,
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            enabled = true,
+                            selected = selectedFilterId == -1L
                         )
-                    },
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = FilterChipDefaults.filterChipColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        selectedContainerColor = Color(0xFF00A86B),
-                        selectedLabelColor = Color.White,
-                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                        enabled = true,
-                        selected = selectedFilterId == -1L
                     )
-                )
+                }
 
-                filters.forEach { filterWithCandles ->
+                items(filters, key = { it.filter.id }) { filterWithCandles ->
                     FilterChip(
                         selected = selectedFilterId == filterWithCandles.filter.id,
                         onClick = { selectedFilterId = filterWithCandles.filter.id },
@@ -201,7 +206,6 @@ fun HistoryScreenContent(
                                 fontSize = 14.sp
                             )
                         },
-                        modifier = Modifier.padding(horizontal = 4.dp),
                         shape = RoundedCornerShape(20.dp),
                         colors = FilterChipDefaults.filterChipColors(
                             containerColor = MaterialTheme.colorScheme.surface,
@@ -218,9 +222,9 @@ fun HistoryScreenContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Top Insights Summary Card (3 columns)
+            // Top Insights Summary Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -238,7 +242,7 @@ fun HistoryScreenContent(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    // Column 1 (RTL Right): Total Maintenance
+                    // Column 1: Total Maintenance
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.weight(1f)
@@ -252,7 +256,7 @@ fun HistoryScreenContent(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = if (totalChanges > 0) totalChanges.toString() else "24",
+                            text = totalChanges.toString(),
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF00A86B),
@@ -282,7 +286,7 @@ fun HistoryScreenContent(
                         color = Color(0xFFDCFCE7)
                     )
 
-                    // Column 2 (Center): Most Replaced
+                    // Column 2: Most Replaced
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.weight(1.2f)
@@ -304,15 +308,17 @@ fun HistoryScreenContent(
                             ),
                             maxLines = 1
                         )
-                        Text(
-                            text = "مرحلة $mostReplacedStage",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = Color(0xFF64748B),
-                                fontSize = 11.sp
+                        if (mostReplacedStage > 0) {
+                            Text(
+                                text = stringResource(R.string.stage_number, mostReplacedStage),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color(0xFF64748B),
+                                    fontSize = 11.sp
+                                )
                             )
-                        )
+                        }
                         Text(
-                            text = stringResource(R.string.times_count, mostReplacedCount),
+                            text = if (mostReplacedCount > 0) stringResource(R.string.times_count, mostReplacedCount) else "-",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = Color(0xFF64748B),
                                 fontSize = 11.sp
@@ -326,7 +332,7 @@ fun HistoryScreenContent(
                         color = Color(0xFFDCFCE7)
                     )
 
-                    // Column 3 (Left): Compliance Rate
+                    // Column 3: Compliance Rate
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.weight(1f)
@@ -340,7 +346,7 @@ fun HistoryScreenContent(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "96%",
+                            text = if (totalChanges > 0) "96%" else "-",
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF00A86B),
@@ -484,15 +490,11 @@ fun HistoryScreenContent(
                         }
                     }
                 } else {
-                    val groupKeys = groupedLogs.keys.toList()
-
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 24.dp, top = 8.dp)
                     ) {
-                        groupKeys.forEachIndexed { groupIndex, month ->
-                            val monthLogs = groupedLogs[month] ?: emptyList()
-
+                        groupedLogs.forEach { (month, monthLogs) ->
                             stickyHeader {
                                 Surface(
                                     modifier = Modifier.fillMaxWidth(),
@@ -502,14 +504,14 @@ fun HistoryScreenContent(
                                         modifier = Modifier
                                             .padding(horizontal = 20.dp, vertical = 8.dp),
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.End
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Surface(
                                             shape = RoundedCornerShape(12.dp),
                                             color = Color(0xFFE2E8F0)
                                         ) {
                                             Text(
-                                                text = if (groupIndex == 0) "عمليتين (2)" else "صيانة شاملة",
+                                                text = stringResource(R.string.times_count, monthLogs.size),
                                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                                 style = MaterialTheme.typography.labelSmall.copy(
                                                     fontSize = 11.sp,
@@ -519,25 +521,23 @@ fun HistoryScreenContent(
                                             )
                                         }
 
-                                        Spacer(modifier = Modifier.weight(1f))
-
-                                        Text(
-                                            text = month,
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.onBackground,
-                                                fontSize = 16.sp
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = month,
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.onBackground,
+                                                    fontSize = 16.sp
+                                                )
                                             )
-                                        )
-
-                                        Spacer(modifier = Modifier.width(10.dp))
-
-                                        Box(
-                                            modifier = Modifier
-                                                .size(14.dp)
-                                                .clip(CircleShape)
-                                                .background(if (groupIndex == 0) Color(0xFF00A86B) else Color(0xFF94A3B8))
-                                        )
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(14.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(0xFF00A86B))
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -598,27 +598,30 @@ fun HistoryScreenContent(
                                     ) {
                                         HistoryLogCard(
                                             log = log,
-                                            filterName = filters.find { it.filter.id == log.filterId }?.filter?.name ?: "",
+                                            filterName = filterNameMap[log.filterId] ?: "",
                                             onDelete = { onDeleteLog(log) }
                                         )
                                     }
 
                                     Spacer(modifier = Modifier.width(14.dp))
 
-                                    // Timeline Dotted Line (Right edge in RTL)
+                                    // Timeline Dotted Line
                                     Box(
                                         modifier = Modifier
                                             .width(14.dp)
                                             .fillMaxHeight(),
                                         contentAlignment = Alignment.TopCenter
                                     ) {
-                                        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxHeight().width(2.dp)) {
-                                            val pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f)
+                                        Canvas(
+                                            modifier = Modifier
+                                                .fillMaxHeight()
+                                                .width(2.dp)
+                                        ) {
                                             drawLine(
                                                 color = Color(0xFFCBD5E1),
-                                                start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                                end = androidx.compose.ui.geometry.Offset(0f, size.height),
-                                                pathEffect = pathEffect,
+                                                start = Offset(0f, 0f),
+                                                end = Offset(0f, size.height),
+                                                pathEffect = dashPathEffect,
                                                 strokeWidth = 2.dp.toPx()
                                             )
                                         }
