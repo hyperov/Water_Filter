@@ -44,7 +44,11 @@ class WaterFilterRepositoryImpl @Inject constructor(
 
     private suspend fun upsertMaintenanceLog(candle: Candle) {
         val existingLogs = dao.getMaintenanceLogsForCandle(candle.filterId, candle.candleNumber.value)
-        val sameDayLog = existingLogs.find { isSameDay(it.changeDateTimestamp, candle.lastChangedTimestamp) }
+        val now = System.currentTimeMillis()
+        val sameDayLog = existingLogs.find { log ->
+            isSameDay(log.changeDateTimestamp, candle.lastChangedTimestamp) ||
+                    isSameDay(log.changeDateTimestamp, now)
+        }
         if (sameDayLog != null) {
             dao.updateMaintenanceLog(
                 sameDayLog.copy(
