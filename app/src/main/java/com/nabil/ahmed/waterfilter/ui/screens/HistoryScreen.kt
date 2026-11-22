@@ -1,7 +1,6 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -58,7 +57,6 @@ fun HistoryScreen(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HistoryScreenContent(
     logs: List<MaintenanceLog>,
@@ -381,29 +379,6 @@ fun HistoryScreenContent(
                     .padding(horizontal = 20.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    onClick = {
-                        Toast.makeText(context, R.string.search_log_placeholder, Toast.LENGTH_SHORT)
-                            .show()
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    ),
-                    modifier = Modifier.size(52.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Rounded.Tune,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(10.dp))
 
                 OutlinedTextField(
                     value = searchQuery,
@@ -443,6 +418,30 @@ fun HistoryScreenContent(
                         focusedBorderColor = Color(0xFF00A86B)
                     )
                 )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Surface(
+                    onClick = {
+                        Toast.makeText(context, R.string.search_log_placeholder, Toast.LENGTH_SHORT)
+                            .show()
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    ),
+                    modifier = Modifier.size(52.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Rounded.Tune,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             // Main Content Timeline List
@@ -568,7 +567,7 @@ fun HistoryScreenContent(
 
                                 Row(
                                     modifier = Modifier
-                                        .padding(horizontal = 20.dp)
+                                        .padding(horizontal = 20.dp, vertical = 6.dp)
                                         .height(IntrinsicSize.Min)
                                 ) {
                                     // Timeline Dotted Line
@@ -596,7 +595,8 @@ fun HistoryScreenContent(
                                     HistoryLogCard(
                                         log = log,
                                         filterName = filterNameMap[log.filterId] ?: "",
-                                        onDelete = { onDeleteLog(log) }
+                                        onDelete = { onDeleteLog(log) },
+                                        modifier = Modifier.weight(1f)
                                     )
 
                                 }

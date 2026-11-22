@@ -1,10 +1,8 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
-import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarToday
@@ -53,14 +51,6 @@ fun HistoryLogCard(
 
     val stageText = remember(log.candleNumber) {
         if (log.candleNumber <= 0) "صيانة شاملة" else "مرحلة ${log.candleNumber}"
-    }
-
-    val performerText = remember(log.id) {
-        if (log.id % 2L == 0L) "شركة الصيانة المعتمدة" else "ذاتي (المستخدم)"
-    }
-
-    val statusBadgeText = remember(log.id) {
-        if (log.id % 2L == 0L) "مكتمل ومفحوص" else "تم التغيير بنجاح"
     }
 
     Card(
@@ -244,72 +234,6 @@ fun HistoryLogCard(
                             fontSize = 13.sp
                         )
                     )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Bottom Status Banner
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFF0FDF4),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFDCFCE7))
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Status Checkmark Pill
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color(0xFFDCFCE7)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.CheckCircle,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = Color(0xFF15803D)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = statusBadgeText,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF15803D),
-                                    fontSize = 11.sp
-                                )
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Performer text
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF94A3B8))
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "القائم بالصيانة: $performerText",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = Color(0xFF475569),
-                                fontSize = 11.sp
-                            ),
-                            maxLines = 1
-                        )
-                    }
                 }
             }
         }
