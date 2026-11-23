@@ -1,6 +1,5 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,12 +10,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -64,7 +60,6 @@ fun HistoryScreenContent(
     onDeleteLog: (MaintenanceLog) -> Unit,
     onNavigateToDashboard: () -> Unit = {}
 ) {
-    val context = LocalContext.current
     var selectedFilterId by remember { mutableLongStateOf(-1L) }
     var searchQuery by remember { mutableStateOf("") }
 
@@ -117,46 +112,26 @@ fun HistoryScreenContent(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             // Top Bar Header
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.candles_maintenance_log_title),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 19.sp,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+                Text(
+                    text = stringResource(R.string.candles_maintenance_log_title),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 19.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
-                    Text(
-                        text = stringResource(R.string.candles_maintenance_log_subtitle),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                )
+                Text(
+                    text = stringResource(R.string.candles_maintenance_log_subtitle),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-
-                IconButton(
-                    onClick = onNavigateToDashboard,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            shape = CircleShape
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                        contentDescription = stringResource(R.string.back),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                )
             }
 
             // Category Filter Pills (Using LazyRow instead of ScrollableTabRow)
@@ -372,18 +347,16 @@ fun HistoryScreenContent(
                 }
             }
 
-            // Search Bar & Filter Options Button
-            Row(
+            // Search Bar
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 20.dp, vertical = 6.dp)
             ) {
-
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     placeholder = {
                         Text(
                             text = stringResource(R.string.search_log_placeholder),
@@ -418,30 +391,6 @@ fun HistoryScreenContent(
                         focusedBorderColor = Color(0xFF00A86B)
                     )
                 )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Surface(
-                    onClick = {
-                        Toast.makeText(context, R.string.search_log_placeholder, Toast.LENGTH_SHORT)
-                            .show()
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    ),
-                    modifier = Modifier.size(52.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Rounded.Tune,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
             }
 
             // Main Content Timeline List
