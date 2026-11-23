@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarToday
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,7 +34,7 @@ fun HistoryLogCard(
     modifier: Modifier = Modifier,
     onDelete: (() -> Unit)? = null
 ) {
-    var showMenu by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val sdfDate = remember { SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("ar")) }
     val formattedDate = remember(log.changeDateTimestamp) {
@@ -138,37 +136,41 @@ fun HistoryLogCard(
 
                 Spacer(modifier = Modifier.width(4.dp))
 
-                Box {
-                    IconButton(
-                        onClick = { showMenu = true },
-                        modifier = Modifier.size(28.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Delete,
-                            contentDescription = stringResource(R.string.remove_candle),
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
+                IconButton(
+                    onClick = { showDeleteDialog = true },
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = stringResource(R.string.delete),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
 
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Rounded.Delete,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error
+                if (showDeleteDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDeleteDialog = false },
+                        title = { Text(text = stringResource(R.string.delete)) },
+                        text = { Text(text = stringResource(R.string.delete_log_confirm)) },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    showDeleteDialog = false
+                                    onDelete?.invoke()
+                                }
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.delete),
+                                    color = MaterialTheme.colorScheme.error
                                 )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onDelete?.invoke()
                             }
-                        )
-                    }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDeleteDialog = false }) {
+                                Text(text = stringResource(R.string.cancel))
+                            }
+                        }
+                    )
                 }
             }
 
