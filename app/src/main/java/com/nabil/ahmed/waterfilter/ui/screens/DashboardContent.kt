@@ -119,15 +119,15 @@ fun DashboardContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.active_candles_count, filter.candles.size),
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF6A8B83))
-                )
-                Text(
                     text = stringResource(R.string.candle_stages),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF0D2823)
                     )
+                )
+                Text(
+                    text = stringResource(R.string.active_candles_count, filter.candles.size),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF6A8B83))
                 )
             }
         }

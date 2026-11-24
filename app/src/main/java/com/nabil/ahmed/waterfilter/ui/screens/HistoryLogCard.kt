@@ -179,10 +179,9 @@ fun HistoryLogCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Info rows: Calendar date & Usage age
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalAlignment = Alignment.Start
             ) {
                 // Calendar Date
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -210,7 +209,7 @@ fun HistoryLogCard(
                         )
                     )
                 }
-
+                Spacer(modifier = Modifier.height(8.dp))
                 // Usage Age / Days
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -229,7 +228,7 @@ fun HistoryLogCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = stringResource(R.string.usage_days, if (daysSinceChange == 0L) 90 else daysSinceChange),
+                        text = stringResource(R.string.usage_days, daysSinceChange),
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
