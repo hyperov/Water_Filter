@@ -399,7 +399,7 @@ fun HistoryScreenContent(
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(32.dp)
+                            modifier = Modifier.padding(24.dp)
                         ) {
                             Surface(
                                 modifier = Modifier.size(100.dp),
@@ -434,18 +434,27 @@ fun HistoryScreenContent(
                                     onClick = onNavigateToDashboard,
                                     shape = RoundedCornerShape(16.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(
-                                            0xFF00A86B
-                                        )
+                                        containerColor = Color(0xFF00A86B)
                                     ),
                                     contentPadding = PaddingValues(
                                         horizontal = 24.dp,
                                         vertical = 12.dp
                                     )
                                 ) {
-                                    Icon(Icons.Rounded.Home, contentDescription = null)
+                                    Icon(
+                                        imageVector = Icons.Rounded.Home,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(22.dp)
+                                    )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text(text = stringResource(R.string.go_to_dashboard))
+                                    Text(
+                                        text = stringResource(R.string.go_to_dashboard),
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp
+                                        ),
+                                        maxLines = 1
+                                    )
                                 }
                             }
                         }
