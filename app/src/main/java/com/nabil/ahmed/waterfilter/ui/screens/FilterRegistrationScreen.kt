@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,8 +59,8 @@ fun FilterRegistrationScreen(
     onNext: (name: String, type: FilterType) -> Unit,
     onBack: () -> Unit
 ) {
-    var filterName by remember { mutableStateOf("") }
-    var selectedType by remember { mutableStateOf(FilterType.CANDLES_3) }
+    var filterName by rememberSaveable { mutableStateOf("") }
+    var selectedType by rememberSaveable { mutableStateOf(FilterType.CANDLES_3) }
     
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current

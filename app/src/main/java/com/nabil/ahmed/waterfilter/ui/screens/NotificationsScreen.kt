@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -78,8 +79,8 @@ fun NotificationsContent(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
-    var showStartTimePicker by remember { mutableStateOf(false) }
-    var showEndTimePicker by remember { mutableStateOf(false) }
+    var showStartTimePicker by rememberSaveable { mutableStateOf(false) }
+    var showEndTimePicker by rememberSaveable { mutableStateOf(false) }
 
     if (showStartTimePicker) {
         val timeState = rememberTimePickerState(

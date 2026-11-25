@@ -16,6 +16,7 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,8 +61,8 @@ fun HistoryScreenContent(
     onDeleteLog: (MaintenanceLog) -> Unit,
     onNavigateToDashboard: () -> Unit = {}
 ) {
-    var selectedFilterId by remember { mutableLongStateOf(-1L) }
-    var searchQuery by remember { mutableStateOf("") }
+    var selectedFilterId by rememberSaveable { mutableLongStateOf(-1L) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
     val filterNameMap = remember(filters) {
         filters.associate { it.filter.id to it.filter.name }

@@ -1,16 +1,39 @@
 package com.nabil.ahmed.waterfilter.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.DoneAll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,9 +45,6 @@ import com.nabil.ahmed.waterfilter.R
 import com.nabil.ahmed.waterfilter.data.util.CandleNumber
 import com.nabil.ahmed.waterfilter.data.util.FilterType
 import com.nabil.ahmed.waterfilter.data.util.Lifespan
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.DoneAll
 import com.nabil.ahmed.waterfilter.ui.theme.WaterFilterTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,18 +57,67 @@ fun CandlesConfigurationScreen(
 ) {
     val candles = remember {
         mutableStateListOf<CandleConfigState>().apply {
-            add(CandleConfigState(CandleNumber.CANDLE_1, R.string.candle_pp, R.string.candle_pp_desc, Lifespan.MONTHS_3))
+            add(
+                CandleConfigState(
+                    CandleNumber.CANDLE_1,
+                    R.string.candle_pp,
+                    R.string.candle_pp_desc,
+                    Lifespan.MONTHS_3
+                )
+            )
             if (filterType.candlesCount >= 3) {
-                add(CandleConfigState(CandleNumber.CANDLE_2, R.string.candle_gac, R.string.candle_gac_desc, Lifespan.MONTHS_6))
-                add(CandleConfigState(CandleNumber.CANDLE_3, R.string.candle_cto, R.string.candle_cto_desc, Lifespan.MONTHS_6))
+                add(
+                    CandleConfigState(
+                        CandleNumber.CANDLE_2,
+                        R.string.candle_gac,
+                        R.string.candle_gac_desc,
+                        Lifespan.MONTHS_6
+                    )
+                )
+                add(
+                    CandleConfigState(
+                        CandleNumber.CANDLE_3,
+                        R.string.candle_cto,
+                        R.string.candle_cto_desc,
+                        Lifespan.MONTHS_6
+                    )
+                )
             }
             if (filterType.candlesCount >= 5) {
-                add(CandleConfigState(CandleNumber.CANDLE_4, R.string.candle_ro, R.string.candle_ro_desc, Lifespan.MONTHS_24))
-                add(CandleConfigState(CandleNumber.CANDLE_5, R.string.candle_post_carbon, R.string.candle_post_carbon_desc, Lifespan.MONTHS_12))
+                add(
+                    CandleConfigState(
+                        CandleNumber.CANDLE_4,
+                        R.string.candle_ro,
+                        R.string.candle_ro_desc,
+                        Lifespan.MONTHS_24
+                    )
+                )
+                add(
+                    CandleConfigState(
+                        CandleNumber.CANDLE_5,
+                        R.string.candle_post_carbon,
+                        R.string.candle_post_carbon_desc,
+                        Lifespan.MONTHS_12
+                    )
+                )
             }
             if (filterType.candlesCount >= 7) {
-                add(CandleConfigState(CandleNumber.CANDLE_6, R.string.candle_mineral, R.string.candle_mineral_desc, Lifespan.MONTHS_12))
-                add(CandleConfigState(CandleNumber.CANDLE_7, R.string.candle_alkaline, R.string.candle_alkaline_desc, Lifespan.MONTHS_12))
+                add(
+                    CandleConfigState(
+                        CandleNumber.CANDLE_6,
+                        R.string.candle_mineral,
+                        R.string.candle_mineral_desc,
+                        Lifespan.MONTHS_12
+                    )
+                )
+                add(
+                    CandleConfigState(
+                        CandleNumber.CANDLE_7,
+                        R.string.candle_alkaline,
+                        R.string.candle_alkaline_desc,
+                        Lifespan.MONTHS_12
+                    )
+                )
             }
         }
     }
@@ -64,13 +133,17 @@ fun CandlesConfigurationScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
         }
     ) { innerPadding ->
         LazyColumn(
+            state = rememberLazyListState(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
@@ -105,9 +178,9 @@ fun CandlesConfigurationScreen(
                         text = stringResource(R.string.candles_setup_desc),
                         style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                     )
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     // Set All to Today Shortcut
                     OutlinedButton(
                         onClick = {
@@ -131,7 +204,7 @@ fun CandlesConfigurationScreen(
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     Text(
                         text = stringResource(R.string.last_maintenance_question),
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
@@ -217,6 +290,10 @@ fun CandlesConfigurationScreen(
 @Composable
 fun CandlesConfigurationPreview() {
     WaterFilterTheme {
-        CandlesConfigurationScreen(filterName = "Home", filterType = FilterType.CANDLES_1, onSave = {}, onBack = {})
+        CandlesConfigurationScreen(
+            filterName = "Home",
+            filterType = FilterType.CANDLES_1,
+            onSave = {},
+            onBack = {})
     }
 }
