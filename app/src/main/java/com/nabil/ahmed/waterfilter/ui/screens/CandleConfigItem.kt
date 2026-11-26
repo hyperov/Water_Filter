@@ -198,6 +198,11 @@ fun CandleConfigItem(
 
             // Selected Date Footnote
             if (candle.lastChangedTimestamp != null) {
+                // Performance Optimization: Cache SimpleDateFormat and string formatting with `remember`
+                // to avoid instantiating SimpleDateFormat and Locale objects on every recomposition pass.
+                val formattedDate = remember(candle.lastChangedTimestamp) {
+                    SimpleDateFormat("dd MMM yyyy", Locale.forLanguageTag("ar")).format(Date(candle.lastChangedTimestamp))
+                }
                 Spacer(modifier = Modifier.height(12.dp))
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -211,7 +216,7 @@ fun CandleConfigItem(
                             style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                         )
                         Text(
-                            text = SimpleDateFormat("dd MMM yyyy", Locale.forLanguageTag("ar")).format(Date(candle.lastChangedTimestamp)),
+                            text = formattedDate,
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary

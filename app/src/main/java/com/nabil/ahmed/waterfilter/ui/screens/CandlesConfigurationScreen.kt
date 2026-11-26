@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +32,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -122,6 +124,12 @@ fun CandlesConfigurationScreen(
         }
     }
 
+    // Performance Optimization: Derived state for button enablement.
+    // Avoids re-evaluating `candles.all { ... }` during unneeded recompositions.
+    val isSaveEnabled by remember(candles) {
+        derivedStateOf { candles.all { it.selection != SelectionType.NONE } }
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -149,7 +157,7 @@ fun CandlesConfigurationScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            item {
+            item(contentType = "header") {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -185,6 +193,7 @@ fun CandlesConfigurationScreen(
                     OutlinedButton(
                         onClick = {
                             val today = System.currentTimeMillis()
+                            // Update items in-place for state snapshot consistency
                             for (i in candles.indices) {
                                 candles[i] = candles[i].copy(
                                     selection = SelectionType.TODAY,
@@ -212,12 +221,18 @@ fun CandlesConfigurationScreen(
                 }
             }
 
-            items(candles, key = { it.candleNumber.value }) { candle ->
+            // Performance Optimization:
+            // 1. Specified explicit primitive `key` AND `contentType` for composition slot recycling during lazy list scrolling.
+            // 2. Used `itemsIndexed` so callbacks receive the item index directly, eliminating O(N) `indexOfFirst` list searches.
+            itemsIndexed(
+                items = candles,
+                key = { _, candle -> candle.candleNumber.value },
+                contentType = { _, _ -> "candle_config_item" }
+            ) { index, candle ->
                 CandleConfigItem(
                     candle = candle,
                     onSelectionChanged = { selection, timestamp ->
-                        val index = candles.indexOfFirst { it.candleNumber == candle.candleNumber }
-                        if (index != -1) {
+                        if (index in candles.indices) {
                             candles[index] = candle.copy(
                                 selection = selection,
                                 lastChangedTimestamp = timestamp
@@ -225,8 +240,7 @@ fun CandlesConfigurationScreen(
                         }
                     },
                     onLifespanChanged = { newLifespan ->
-                        val index = candles.indexOfFirst { it.candleNumber == candle.candleNumber }
-                        if (index != -1) {
+                        if (index in candles.indices) {
                             candles[index] = candle.copy(lifespan = newLifespan)
                         }
                     },
@@ -237,7 +251,7 @@ fun CandlesConfigurationScreen(
             }
 
             if (candles.size < 7) {
-                item {
+                item(contentType = "add_button") {
                     OutlinedButton(
                         onClick = {
                             val nextNumber = candles.size + 1
@@ -262,10 +276,10 @@ fun CandlesConfigurationScreen(
                 }
             }
 
-            item {
+            item(contentType = "save_button") {
                 Button(
                     onClick = { onSave(candles) },
-                    enabled = candles.all { it.selection != SelectionType.NONE },
+                    enabled = isSaveEnabled,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp)
